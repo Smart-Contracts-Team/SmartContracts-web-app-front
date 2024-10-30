@@ -1,0 +1,30 @@
+{
+  "categories": [
+    {
+      "id": "1",
+      "name": "maquillaje",
+      "display": "Maquillaje"
+    },
+    {
+      "id": "2",
+      "name": "cocina",
+      "display": "Cocina"
+    },
+    {
+      "id": "3",
+      "name": "autos",
+      "display": "Autos"
+    }
+  ],
+  "products": [
+    { "id": "1", "name": "Smartphone", "price": 299.99, "category_id": "1" },
+    { "id": "2", "name": "Laptop", "price": 799.99, "category_id": "1" },
+    { "id": "3", "name": "Headphones", "price": 89.99, "category_id": "1" },
+    { "id": "4", "name": "T-Shirt", "price": 19.99, "category_id": "2" },
+    { "id": "5", "name": "Jeans", "price": 49.99, "category_id": "2" },
+    { "id": "6", "name": "Jacket", "price": 99.99, "category_id": "2" },
+    { "id": "7", "name": "The Great Gatsby", "price": 10.99, "category_id": "3" },
+    { "id": "8", "name": "1984", "price": 8.99, "category_id": "3" },
+    { "id": "9", "name": "To Kill a Mockingbird", "price": 12.99, "category_id": "3" }
+  ]
+}
