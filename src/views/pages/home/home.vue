@@ -26,7 +26,7 @@ const carouselResponsiveOptions = ref([
 onMounted(async () => {
   try {
     const userId = Number(localStorage.getItem('userId'))
-    const response = await ServiceService.getServicesSmallByUserId(userId)
+    const response = await ServiceService.getServicesByUserId(userId)
     services.value = response
   } catch (error) {
     if (error.response) {
