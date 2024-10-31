@@ -25,7 +25,7 @@ const router = createRouter({
           path: '/category/:categoryName',
           name: 'CategoryView',
           component: CategoryView,
-          props: true // Permite pasar los parámetros de ruta como props al componente
+          props: true
         },
 
         // USER
