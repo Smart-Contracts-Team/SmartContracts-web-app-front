@@ -26,30 +26,13 @@ const carouselResponsiveOptions = ref([
 onMounted(async () => {
   try {
     const userId = Number(localStorage.getItem('userId'))
-
-    if (!userId) {
-      console.error('User ID is not available.')
-      return
-    }
-
     const response = await ServiceService.getServicesSmallByUserId(userId)
-    console.log('Respuesta de la API:', response) // Verifica lo que regresa la API
-    services.value = response // Asigna la respuesta a services.value
+    services.value = response
   } catch (error) {
     if (error.response) {
-      console.error('Error en la respuesta:', error.response.data)
-      console.error('Código de estado:', error.response.status)
-    } else if (error.request) {
-      console.error('Error en la solicitud:', error.request)
-      console.error('Detalles de la solicitud:', {
-        method: error.request.method,
-        url: error.request.url,
-        headers: error.request.headers,
-        responseType: error.request.responseType,
-        timeout: error.request.timeout
-      })
+      console.error('Error al obtener los servicios:', error)
     } else {
-      console.error('Error', error.message)
+      console.error('Token no encontrado en localStorage')
     }
   }
 })
