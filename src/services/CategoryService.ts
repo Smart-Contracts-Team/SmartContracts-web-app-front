@@ -55,8 +55,20 @@ export const CategoryService = {
   },
 
   async getProductsByCategoryName(categoryName: string): Promise<IApiResponse<[]>> {
-    //TODO: Category name debería ser category id
-    const response = await httpClient.get<IApiResponse<[]>>(`/products?category_id=${categoryName}`)
+    // Obtener todas las categorías
+    const categoriesResponse =
+      await httpClient.get<IApiResponse<{ id: string; name: string }[]>>(`/categories`)
+    const categories = categoriesResponse.data
+
+    // Encontrar la categoría cuyo nombre coincida
+    const category = categories.find((cat) => cat.name === categoryName)
+
+    if (!category) {
+      throw new Error(`Category with name "${categoryName}" not found`)
+    }
+
+    // Obtener productos con el category_id de la categoría encontrada
+    const response = await httpClient.get<IApiResponse<[]>>(`/products?category_id=${category.id}`)
     return response.data
   }
 }

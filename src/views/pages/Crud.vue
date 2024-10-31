@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ProductService } from '@/service/ProductService';
+import { ProductService } from '@/services/ServiceService';
 import { FilterMatchMode } from '@primevue/core/api';
 import { useToast } from 'primevue/usetoast';
 import { onMounted, ref } from 'vue';
