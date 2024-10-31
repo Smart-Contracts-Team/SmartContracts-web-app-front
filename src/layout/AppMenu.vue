@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import AppMenuItem from './AppMenuItem.vue'
-import { CategoryService } from '@/service/CategoryService';
+import { CategoryService } from '@/services/CategoryService';
 
 const model = ref([
   {
@@ -96,14 +96,13 @@ const fetchCategories = async () => {
     const response = await CategoryService.getCategories();
     model.value[1].items = response.map(category => ({
       label: category.display,
-      icon: 'pi pi-fw pi-home',
-      to: `/category/${category.name}`
+      icon: 'pi pi-fw pi-list',
+      url: `/category/${category.name}`
     }));
   } catch (error) {
     console.error('Error fetching categories:', error);
   }
-}
-
+};
 
 onMounted(fetchCategories)
 </script>
