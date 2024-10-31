@@ -46,8 +46,6 @@ async function handleLogin() {
     // Llamada a la API de login usando el servicio
     const response = await AuthService.login(email.value, password.value);
     if (response.token) {
-      // Guardar el token o la información en localStorage
-      localStorage.setItem('userToken', response.token); // ajusta la clave y valor según tus datos de respuesta
       router.push('/home'); // Redirige al usuario a la página de inicio o al destino deseado
     } else {
       loginError.value = 'Credenciales incorrectas';

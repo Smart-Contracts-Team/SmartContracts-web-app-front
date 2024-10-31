@@ -1,5 +1,8 @@
 // authService.js o authService.ts
 import { httpClient } from '@/config/httpClient'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
 
 export const AuthService = {
   async login(email: string, password: string) {
@@ -23,7 +26,15 @@ export const AuthService = {
   },
 
   logout() {
-    localStorage.removeItem('token')
-    localStorage.removeItem('userId')
+    try {
+      // Eliminar el token y el userId del localStorage
+      localStorage.removeItem('token')
+      localStorage.removeItem('userId')
+
+      // Redirigir al usuario a la página de inicio de sesión
+      router.push({ name: 'login' })
+    } catch (error) {
+      console.error('Error during logout:', error)
+    }
   }
 }
