@@ -18,3 +18,8 @@ httpClient.interceptors.request.use(
     return Promise.reject(error)
   }
 )
+
+axios.interceptors.request.use((request) => {
+  console.log('Starting Request', request)
+  return request
+})

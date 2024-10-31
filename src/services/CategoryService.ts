@@ -12,9 +12,9 @@ export const CategoryService = {
   async getCategories(): Promise<IApiResponse<IRegisteredCategory[]>> {
     const response = await httpClient.get<IApiResponse<IRegisteredCategory[]>>(`${serviceName}`)
     return response.data
-  },
+  }
 
-  async getCategoriesMini(): Promise<IApiResponse<IRegisteredCategory[]>> {
+  /*async getCategoriesMini(): Promise<IApiResponse<IRegisteredCategory[]>> {
     const response = await httpClient.get<IApiResponse<IRegisteredCategory[]>>(`${serviceName}`)
     const dataArray = Object.values(response.data.data)
     return {
@@ -70,5 +70,5 @@ export const CategoryService = {
     // Obtener productos con el category_id de la categoría encontrada
     const response = await httpClient.get<IApiResponse<[]>>(`/products?category_id=${category.id}`)
     return response.data
-  }
+  }*/
 }

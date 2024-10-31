@@ -1,6 +1,4 @@
 import { httpClient } from '@/config/httpClient'
-import type { IApiResponse } from '@/interfaces/Common'
-import { type IRegisteredService } from '../interfaces/Service'
 
 const serviceName = '/service'
 
