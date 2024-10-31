@@ -1,9 +1,63 @@
 <script setup lang="ts">
 import { ref } from 'vue';
+import { useRouter } from 'vue-router';
+import { AuthService } from '@/services/AuthService';
 
 const email = ref('');
 const password = ref('');
 const checked = ref(false);
+const emailError = ref('');
+const passwordError = ref('');
+const loginError = ref('');
+
+const router = useRouter();
+
+// Función de validación de email
+function validateEmail() {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!email.value) {
+    emailError.value = 'El correo es obligatorio';
+  } else if (!emailRegex.test(email.value)) {
+    emailError.value = 'Por favor, introduce un correo válido';
+  } else {
+    emailError.value = '';
+  }
+}
+
+// Función de validación de contraseña
+function validatePassword() {
+  if (!password.value) {
+    passwordError.value = 'La contraseña es obligatoria';
+  } else if (password.value.length < 6) {
+    passwordError.value = 'La contraseña debe tener al menos 6 caracteres';
+  } else {
+    passwordError.value = '';
+  }
+}
+
+// Función para manejar el inicio de sesión
+async function handleLogin() {
+  // Validar campos
+  validateEmail();
+  validatePassword();
+  if (emailError.value || passwordError.value) return;
+
+  try {
+    // Llamada a la API de login usando el servicio
+    const response = await AuthService.login(email.value, password.value);
+    if (response.token) {
+      // Guardar el token o la información en localStorage
+      localStorage.setItem('userToken', response.token); // ajusta la clave y valor según tus datos de respuesta
+      router.push('/home'); // Redirige al usuario a la página de inicio o al destino deseado
+    } else {
+      loginError.value = 'Credenciales incorrectas';
+    }
+  } catch (error) {
+    loginError.value = 'Error al iniciar sesión, por favor intenta de nuevo';
+  }
+}
+
+
 </script>
 
 <template>
@@ -35,19 +89,22 @@ const checked = ref(false);
 
           <div>
             <label for="email1" class="block text-surface-900 dark:text-surface-0 text-xl font-medium mb-2">Email</label>
-            <InputText id="email1" type="text" placeholder="Email address" class="w-full md:w-[30rem] mb-8" v-model="email" />
+            <InputText id="email" v-model="email" @blur="validateEmail" type="email" placeholder="Email address" class="w-full md:w-[30rem] mb-8" />
+            <p v-if="emailError" class="text-red-500 text-xs mt-1">{{ emailError }}</p>
 
             <label for="password1" class="block text-surface-900 dark:text-surface-0 font-medium text-xl mb-2">Password</label>
-            <Password id="password1" v-model="password" placeholder="Password" :toggleMask="true" class="mb-4" fluid :feedback="false"></Password>
+            <Password id="password" v-model="password" @blur="validatePassword" placeholder="Password" :toggleMask="true" class="mb-4" fluid :feedback="false"></Password>
+            <p v-if="passwordError" class="text-red-500 text-xs mt-1">{{ passwordError }}</p>
 
             <div class="flex items-center justify-between mt-2 mb-8 gap-8">
               <div class="flex items-center">
                 <Checkbox v-model="checked" id="rememberme1" binary class="mr-2"></Checkbox>
-                <label for="rememberme1">Remember me</label>
+                <label for="rememberme">Remember me</label>
               </div>
               <span class="font-medium no-underline ml-2 text-right cursor-pointer text-primary">Forgot password?</span>
             </div>
-            <Button label="Sign In" class="w-full" as="router-link" to="/"></Button>
+            <Button @click="handleLogin" type="submit" label="Sign In" class="w-full"></Button>
+            <p v-if="loginError" class="text-red-500 text-xs mt-2">{{ loginError }}</p>
           </div>
         </div>
       </div>

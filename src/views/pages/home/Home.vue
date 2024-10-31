@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { PhotoService } from '@/service/PhotoService'
-import { ProductService } from '@/service/ProductService'
+import { PhotoService } from '@/services/PhotoService'
+import { ServiceService } from '@/services/ServiceService'
 import { onMounted, ref } from 'vue'
 
-const products = ref([])
+const services = ref([])
 const images = ref([])
 const carouselResponsiveOptions = ref([
   {
@@ -24,8 +24,9 @@ const carouselResponsiveOptions = ref([
 ])
 
 onMounted(() => {
-  ProductService.getProductsSmall().then((data) => (products.value = data))
-  PhotoService.getImages().then((data) => (images.value = data))
+  console.log("servicios", ServiceService.getServicesSmallByUserId(1));
+  /*ServiceService.getServicesSmall().then((data) => (services.value = data))
+  PhotoService.getImages().then((data) => (images.value = data))*/
 })
 </script>
 
@@ -34,7 +35,7 @@ onMounted(() => {
   <div class="card">
     <div class="font-semibold text-xl mb-4">Ofertas del Día</div>
     <Carousel
-      :value="products"
+      :value="services"
       :numVisible="4"
       :numScroll="4"
       :responsiveOptions="carouselResponsiveOptions"
@@ -71,7 +72,7 @@ onMounted(() => {
   <div class="card">
     <div class="font-semibold text-xl mb-4">Influencers más populares</div>
     <Carousel
-      :value="products"
+      :value="services"
       :numVisible="4"
       :numScroll="4"
       :responsiveOptions="carouselResponsiveOptions"
