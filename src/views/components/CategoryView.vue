@@ -69,7 +69,7 @@ onMounted(() => {
                             0px 1px 2px 0px rgba(0, 0, 0, 0.06);
                         "
                       >
-                        <span class="text-surface-900 font-medium text-sm">{{ item.rating }}</span>
+                        <span class="text-surface-900 font-medium text-sm">{{ item.starts }}</span>
                         <i class="pi pi-star-fill text-yellow-500"></i>
                       </div>
                     </div>
@@ -130,7 +130,7 @@ onMounted(() => {
                             0px 1px 2px 0px rgba(0, 0, 0, 0.06);
                         "
                       >
-                        <span class="text-surface-900 font-medium text-sm">{{ item.rating }}</span>
+                        <span class="text-surface-900 font-medium text-sm">{{ item.starts }}</span>
                         <i class="pi pi-star-fill text-yellow-500"></i>
                       </div>
                     </div>
