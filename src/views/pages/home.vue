@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { PhotoService } from '@/services/PhotoService'
+import { storageBaseUrl } from '@/config/firebaseConfig';
 import { ServiceService } from '@/services/ServiceService'
 import { onMounted, ref } from 'vue'
 
@@ -53,7 +54,7 @@ onMounted(async () => {
           <div class="mb-4">
             <div class="relative mx-auto">
               <img
-                :src="'https://primefaces.org/cdn/primevue/images/product/' + slotProps.data.photo"
+                :src="`${storageBaseUrl}` + slotProps.data.photo"
                 :alt="slotProps.data.name"
                 class="w-full rounded"
               />
@@ -90,7 +91,7 @@ onMounted(async () => {
           <div class="mb-4">
             <div class="relative mx-auto">
               <img
-                :src="'https://primefaces.org/cdn/primevue/images/product/' + slotProps.data.photo"
+                :src="`${storageBaseUrl}` + slotProps.data.photo"
                 :alt="slotProps.data.name"
                 class="w-full rounded"
               />
