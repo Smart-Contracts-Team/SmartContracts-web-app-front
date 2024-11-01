@@ -8,7 +8,7 @@ const router = createRouter({
   routes: [
     {
       path: '/',
-      redirect: '/home',
+      redirect: '/auth/login',
       component: AppLayout,
       children: [
         {
@@ -22,10 +22,10 @@ const router = createRouter({
           component: () => import('@/views/pages/Dashboard.vue')
         },
         {
-          path: '/category/:category',
+          path: '/category/:categoryName',
           name: 'CategoryView',
           component: CategoryView,
-          props: true // Permite pasar los parámetros de ruta como props al componente
+          props: true
         },
 
         // USER

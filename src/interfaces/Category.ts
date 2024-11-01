@@ -8,7 +8,6 @@ export interface IRegisteredCategory {
   id: number
   registeredAt: string
   category: ICategory
-  //areaId: string;
 }
 
 export interface IRegisterCategoryRequestDto {

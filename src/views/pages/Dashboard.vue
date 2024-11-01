@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { useLayout } from '@/layout/composables/layout';
-import { ProductService } from '@/services/ServiceService';
+import { ServiceService } from '@/services/ServiceService';
 import { onMounted, ref, watch } from 'vue';
 
 const { getPrimary, getSurface, isDarkTheme } = useLayout();
 
-const products = ref(null);
+const services = ref([])
 const chartData = ref(null);
 const chartOptions = ref(null);
 
@@ -14,8 +14,18 @@ const items = ref([
   { label: 'Remove', icon: 'pi pi-fw pi-trash' }
 ]);
 
-onMounted(() => {
-  ProductService.getProductsSmall().then((data) => (products.value = data));
+onMounted(async () => {
+  try {
+    const userId = Number(localStorage.getItem('userId'))
+    const response = await ServiceService.getServicesSmallByUserId(userId)
+    services.value = response
+  } catch (error) {
+    if (error.response) {
+      console.error('Error al obtener los servicios:', error)
+    } else {
+      console.error('Token no encontrado en localStorage')
+    }
+  }
   chartData.value = setChartData();
   chartOptions.value = setChartOptions();
 });
@@ -166,7 +176,7 @@ watch([getPrimary, getSurface, isDarkTheme], () => {
     <div class="col-span-12 xl:col-span-6">
       <div class="card">
         <div class="font-semibold text-xl mb-4">Recent Sales</div>
-        <DataTable :value="products" :rows="5" :paginator="true" responsiveLayout="scroll">
+        <DataTable :value="services" :rows="5" :paginator="true" responsiveLayout="scroll">
           <Column style="width: 15%" header="Image">
             <template #body="slotProps">
               <img :src="`https://primefaces.org/cdn/primevue/images/product/${slotProps.data.image}`" :alt="slotProps.data.image" width="50" class="shadow" />
