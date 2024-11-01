@@ -97,7 +97,9 @@ const fetchCategories = async () => {
     model.value[1].items = response.map(category => ({
       label: category.display,
       icon: 'pi pi-fw pi-list',
-      url: `/category/${category.name}`
+      // TODO: Usar otro método para no tener que recargar la página completa
+      url: `/category/${category.name}`, // Genera una URL dinámica para cada categoría
+      //to: `/category/${category.name}`
     }));
   } catch (error) {
     console.error('Error fetching categories:', error);
