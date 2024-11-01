@@ -14,12 +14,12 @@ const router = createRouter({
         {
           path: 'home',
           name: 'home',
-          component: () => import('@/views/pages/home/home.vue')
+          component: () => import('@/views/pages/home.vue')
         },
         {
           path: 'dashboard',
           name: 'dashboard',
-          component: () => import('@/views/Dashboard.vue')
+          component: () => import('@/views/pages/Dashboard.vue')
         },
         {
           path: '/category/:categoryName',

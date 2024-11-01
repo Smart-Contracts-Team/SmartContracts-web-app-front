@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { PhotoService } from '@/services/PhotoService'
+import { storageBaseUrl } from '@/config/firebaseConfig';
 import { ServiceService } from '@/services/ServiceService'
 import { onMounted, ref } from 'vue'
 
@@ -53,7 +54,7 @@ onMounted(async () => {
           <div class="mb-4">
             <div class="relative mx-auto">
               <img
-                :src="'https://primefaces.org/cdn/primevue/images/product/' + slotProps.data.image"
+                :src="`${storageBaseUrl}` + slotProps.data.photo"
                 :alt="slotProps.data.name"
                 class="w-full rounded"
               />
@@ -63,7 +64,7 @@ onMounted(async () => {
               ></div>
             </div>
           </div>
-          <div class="mb-4 font-medium">{{ slotProps.data.name }}</div>
+          <div class="mb-4 font-medium">{{ slotProps.data.description }}</div>
           <div class="flex justify-between items-center">
             <div class="mt-0 font-semibold text-xl">${{ slotProps.data.price }}</div>
             <span>
@@ -90,7 +91,7 @@ onMounted(async () => {
           <div class="mb-4">
             <div class="relative mx-auto">
               <img
-                :src="'https://primefaces.org/cdn/primevue/images/product/' + slotProps.data.image"
+                :src="`${storageBaseUrl}` + slotProps.data.photo"
                 :alt="slotProps.data.name"
                 class="w-full rounded"
               />
@@ -100,7 +101,7 @@ onMounted(async () => {
               ></div>
             </div>
           </div>
-          <div class="mb-4 font-medium">{{ slotProps.data.name }}</div>
+          <div class="mb-4 font-medium">{{ slotProps.data.description }}</div>
           <div class="flex justify-between items-center">
             <div class="mt-0 font-semibold text-xl">${{ slotProps.data.price }}</div>
             <span>
