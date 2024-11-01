@@ -118,7 +118,7 @@ function getPresetExt() {
 function updateColors(color: any) {
   setPrimary(color.name);
   updatePreset(getPresetExt());
-
+  
 }
 </script>
 
