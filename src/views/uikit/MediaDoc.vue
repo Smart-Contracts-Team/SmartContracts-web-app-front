@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { PhotoService } from '@/services/PhotoService';
-import { ProductService } from '@/services/ServiceService';
+import { ProductService } from '@/services/ProductService';
 import { onMounted, ref } from 'vue';
 
 const products = ref([]);

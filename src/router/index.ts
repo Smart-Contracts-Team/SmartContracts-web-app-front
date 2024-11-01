@@ -34,7 +34,11 @@ const router = createRouter({
           name: 'user-profile',
           component: () => import('@/views/pages/user-profile/User-profile.vue')
         },
-
+        {
+          path: 'service',
+          name: 'user-service',
+          component: () => import('@/views/uikit/MediaDoc.vue')
+        },
         //UI KIT
         {
           path: '/uikit',
