@@ -63,6 +63,16 @@ const model = ref([
                 to: '/auth/login'
               },
               {
+                label: 'Influencer Register',
+                icon: 'pi pi-fw pi-sign-in',
+                to: '/auth/influencer-register'
+              },
+              {
+                label: 'Business Register',
+                icon: 'pi pi-fw pi-sign-in',
+                to: '/auth/business-register'
+              },
+              {
                 label: 'Access Denied',
                 icon: 'pi pi-fw pi-lock',
                 to: '/auth/access'
