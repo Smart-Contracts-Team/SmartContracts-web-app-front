@@ -141,6 +141,16 @@ const router = createRouter({
       component: () => import('@/views/pages/auth/Login.vue')
     },
     {
+      path: '/auth/influencer-register',
+      name: 'influencerRegister',
+      component: () => import('@/views/pages/auth/InfluencerRegister.vue')
+    },
+    {
+      path: '/auth/business-register',
+      name: 'businessRegister',
+      component: () => import('@/views/pages/auth/BusinessRegister.vue')
+    },
+    {
       path: '/auth/access',
       name: 'accessDenied',
       component: () => import('@/views/pages/error/Access.vue')

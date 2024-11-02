@@ -1,65 +1,119 @@
 <script setup lang="ts">
-import { ref } from 'vue';
-import Divider from 'primevue/divider';
+import { ref, type Ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { AuthService } from '@/services/AuthService';
+import type { IUser } from '@/interfaces/User';
 
-const email = ref('');
-const password = ref('');
-const checked = ref(false);
-const emailError = ref('');
-const passwordError = ref('');
-const loginError = ref('');
+const userData = ref<IUser>({
+  id: '',
+  username: '',
+  firstName: '',
+  lastName: '',
+  typeOfUser: '',
+  ruc: '',
+  email: '',
+  password: '',
+  phone: '',
+  birthDate: '',
+  photo: '',
+  location: '',
+  role: '',
+});
+
+const errorValidation = {
+  usernameError: ref(''),
+  firstNameError: ref(''),
+  lastNameError: ref(''),
+  rucError: ref(''),
+  emailError: ref(''),
+  passwordError: ref(''),
+  phoneError: ref(''),
+  birthDateError: ref(''),
+  photoError: ref(''),
+  locationError: ref(''),
+};
+const registerError = ref('');
 
 const router = useRouter();
 
-// Función de validación de email
+// Funciónes de validación
+function validateField(value: string, errorMsg: string, errorRef: Ref<string>) {
+  if (!value) {
+    errorRef.value = errorMsg;
+  } else {
+    errorRef.value = '';
+  }
+}
+
 function validateEmail() {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!email.value) {
-    emailError.value = 'El correo es obligatorio';
-  } else if (!emailRegex.test(email.value)) {
-    emailError.value = 'Por favor, introduce un correo válido';
+  if (!userData.value.email) {
+    errorValidation.emailError.value = 'El correo es obligatorio';
+  } else if (!emailRegex.test(userData.value.email)) {
+    errorValidation.emailError.value = 'Por favor, introduce un correo válido';
   } else {
-    emailError.value = '';
+    errorValidation.emailError.value = '';
   }
 }
 
-// Función de validación de contraseña
 function validatePassword() {
-  if (!password.value) {
-    passwordError.value = 'La contraseña es obligatoria';
-  } else if (password.value.length < 6) {
-    passwordError.value = 'La contraseña debe tener al menos 6 caracteres';
+  if (!userData.value.password) {
+    errorValidation.passwordError.value = 'La contraseña es obligatoria';
+  } else if (userData.value.password.length < 6) {
+    errorValidation.passwordError.value = 'La contraseña debe tener al menos 6 caracteres';
   } else {
-    passwordError.value = '';
+    errorValidation.passwordError.value = '';
   }
 }
-
-// Función para manejar el inicio de sesión
-async function handleLogin() {
-  // Validar campos
+// Función para manejar el registro
+async function handleRegister() {
+  // Llama a todas las funciones de validación
+  validateField(userData.value.username, 'El nombre de usuario es obligatorio', errorValidation.usernameError);
+  validateField(userData.value.firstName, 'El primer nombre es obligatorio', errorValidation.firstNameError);
+  validateField(userData.value.lastName, 'El apellido es obligatorio', errorValidation.lastNameError);
+  validateField(userData.value.ruc, 'El RUC es obligatorio', errorValidation.rucError);
   validateEmail();
   validatePassword();
-  if (emailError.value || passwordError.value) return;
+  validateField(userData.value.phone, 'El celular es obligatorio', errorValidation.phoneError);
+  //validateField(userData.value.birthDate, 'La fecha de nacimiento es obligatoria', errorValidation.birthDateError);
+  validateField(userData.value.location, 'La ubicación es obligatoria', errorValidation.locationError);
+
+  console.log(userData)
+  // Verifica si hay errores en los campos
+  if (Object.values(errorValidation).some(ref => ref.value)) {
+    console.log(errorValidation);
+    return;
+  }
 
   try {
-    // Llamada a la API de login usando el servicio
-    const response = await AuthService.login(email.value, password.value);
-    if (response.token) {
-      router.push('/home'); // Redirige al usuario a la página de inicio o al destino deseado
+    const response = await AuthService.register({
+      id: '',
+      username: userData.value.username,
+      firstName: userData.value.firstName,
+      lastName: userData.value.lastName,
+      typeOfUser: 'Influencer',
+      ruc: userData.value.ruc,
+      email: userData.value.email,
+      password: userData.value.password,
+      phone: userData.value.phone,
+      birthDate: userData.value.birthDate,
+      photo: 'user-profile.png?alt=media&token=e0e6d954-f22d-43ba-bf97-1ebd5d28e3c9',
+      location: userData.value.location,
+      role: 'USER'
+    });
+
+    console.log(response);
+    if (response.success) {
+      router.push('/home');
+      Object.keys(userData.value).forEach(key => userData.value[key as keyof IUser] = '');
+      Object.keys(errorValidation).forEach(key => errorValidation[key as keyof typeof errorValidation].value = '');
     } else {
-      loginError.value = 'Credenciales incorrectas';
+      registerError.value = response.message || 'Hubo un error en el registro';
     }
   } catch (error) {
-    loginError.value = 'Error al iniciar sesión, por favor intenta de nuevo';
+    registerError.value = 'Error al registrarse, por favor intenta de nuevo';
   }
 }
-
-function redirectTo(path:string) {
-  router.push(path)
-}
-
 </script>
 
 <template>
@@ -86,43 +140,63 @@ function redirectTo(path:string) {
                   fill="var(--primary-color)" />
               </g>
             </svg>
-            <div class="text-surface-900 dark:text-surface-0 text-3xl font-medium mb-4">Welcome to Smart Contracts!
-            </div>
-            <span class="text-muted-color font-medium">Sign in to continue</span>
+            <div class="text-surface-900 dark:text-surface-0 text-3xl font-medium mb-4">Influencer Register</div>
+            <span class="text-muted-color font-medium">Sign up to continue</span>
           </div>
 
           <div>
-            <label for="email1"
-              class="block text-surface-900 dark:text-surface-0 text-xl font-medium mb-2">Email</label>
-            <InputText id="email" v-model="email" @blur="validateEmail" type="email" placeholder="Email address"
+            <label for="username"
+              class="block text-surface-900 dark:text-surface-0 text-xl font-medium mb-2">Username</label>
+            <InputText id="username" v-model="userData.username" type="text" placeholder="Username"
               class="w-full md:w-[30rem] mb-8" />
-            <p v-if="emailError" class="text-red-500 text-xs mt-1">{{ emailError }}</p>
+            <p v-if="errorValidation.usernameError" class="text-red-500 text-xs mt-1">{{ errorValidation.usernameError
+              }}</p>
 
-            <label for="password1"
+            <label for="firstName"
+              class="block text-surface-900 dark:text-surface-0 text-xl font-medium mb-2">Firstname</label>
+            <InputText id="firstName" v-model="userData.firstName" type="text" placeholder="Firstname"
+              class="w-full md:w-[30rem] mb-8" />
+            <p v-if="errorValidation.firstNameError" class="text-red-500 text-xs mt-1">{{ errorValidation.firstNameError
+              }}</p>
+
+            <label for="lastName"
+              class="block text-surface-900 dark:text-surface-0 text-xl font-medium mb-2">Lastname</label>
+            <InputText id="lastName" v-model="userData.lastName" type="text" placeholder="Lastname"
+              class="w-full md:w-[30rem] mb-8" />
+            <p v-if="errorValidation.lastNameError" class="text-red-500 text-xs mt-1">{{ errorValidation.lastNameError
+              }}</p>
+
+            <label for="ruc" class="block text-surface-900 dark:text-surface-0 text-xl font-medium mb-2">Ruc</label>
+            <InputText id="ruc" v-model="userData.ruc" type="text" placeholder="RUC" class="w-full md:w-[30rem] mb-8" />
+            <p v-if="errorValidation.rucError" class="text-red-500 text-xs mt-1">{{ errorValidation.rucError
+              }}</p>
+
+            <label for="email" class="block text-surface-900 dark:text-surface-0 text-xl font-medium mb-2">Email</label>
+            <InputText id="email" v-model="userData.email" @blur="validateEmail" type="email"
+              placeholder="Email address" class="w-full md:w-[30rem] mb-8" />
+            <p v-if="errorValidation.emailError" class="text-red-500 text-xs mt-1">{{ errorValidation.emailError }}</p>
+
+            <label for="password"
               class="block text-surface-900 dark:text-surface-0 font-medium text-xl mb-2">Password</label>
-            <Password id="password" v-model="password" @blur="validatePassword" placeholder="Password"
+            <Password id="password" v-model="userData.password" @blur="validatePassword" placeholder="Password"
               :toggleMask="true" class="mb-4" fluid :feedback="false"></Password>
-            <p v-if="passwordError" class="text-red-500 text-xs mt-1">{{ passwordError }}</p>
+            <p v-if="errorValidation.passwordError" class="text-red-500 text-xs mt-1">{{ errorValidation.passwordError
+              }}</p>
 
-            <div class="flex items-center justify-between mt-2 mb-8 gap-8">
-              <div class="flex items-center">
-                <Checkbox v-model="checked" id="rememberme1" binary class="mr-2"></Checkbox>
-                <label for="rememberme">Remember me</label>
-              </div>
-              <span class="font-medium no-underline ml-2 text-right cursor-pointer text-primary">Forgot password?</span>
-            </div>
-            <Button @click="handleLogin" type="submit" label="Sign In" class="w-full"></Button>
-            <p v-if="loginError" class="text-red-500 text-xs mt-2">{{ loginError }}</p>
-            
-            <Divider type="solid" align="center" layout="horizontal">OR</Divider>
-            <div class="flex items-center justify-center">
-              <label for="sign-up" class="block text-surface-900 dark:text-surface-0 font-medium text-l my-2">Sign
-                Up As</label>
-            </div>
-            <div class="flex items-center justify-between mt-2 mb-8 gap-8">
-              <Button type="button" label="Influencer" class="w-full" @click="redirectTo('/auth/influencer-register')"></Button>
-              <Button type="button" label="Business" class="w-full" @click="redirectTo('/auth/business-register')"></Button>
-            </div>
+            <label for="phone" class="block text-surface-900 dark:text-surface-0 text-xl font-medium mb-2">Phone</label>
+            <InputText id="phone" v-model="userData.phone" type="text" placeholder="Phone"
+              class="w-full md:w-[30rem] mb-8" />
+            <p v-if="errorValidation.phoneError" class="text-red-500 text-xs mt-1">{{ errorValidation.phoneError }}</p>
+
+            <label for="location"
+              class="block text-surface-900 dark:text-surface-0 text-xl font-medium mb-2">Location</label>
+            <InputText id="location" v-model="userData.location" type="text" placeholder="Location"
+              class="w-full md:w-[30rem] mb-8" />
+            <p v-if="errorValidation.locationError" class="text-red-500 text-xs mt-1">{{ errorValidation.locationError
+              }}</p>
+
+            <Button @click="handleRegister" type="submit" label="Sign In" class="w-full"></Button>
+            <p v-if="registerError" class="text-red-500 text-xs mt-2">{{ registerError }}</p>
           </div>
         </div>
       </div>
