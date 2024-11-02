@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { storageBaseUrl } from '@/config/firebaseConfig';
-import type { IBusiness } from '@/interfaces/User';
+import type { IUser } from '@/interfaces/User';
 import type { IService } from '@/interfaces/Service';
 import { ServiceService } from '@/services/ServiceService'
 import { UserService } from '@/services/UserService';
 import { onMounted, ref } from 'vue'
 
 const services = ref<IService[]>([]);
-const business = ref<IBusiness[]>([]);
+const business = ref<IUser[]>([]);
 const carouselResponsiveOptions = ref([
   {
     breakpoint: '1024px',

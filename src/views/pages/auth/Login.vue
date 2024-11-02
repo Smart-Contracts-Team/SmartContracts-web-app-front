@@ -56,6 +56,9 @@ async function handleLogin() {
   }
 }
 
+function redirectTo(path:string) {
+  router.push(path)
+}
 
 </script>
 
@@ -117,8 +120,8 @@ async function handleLogin() {
                 Up As</label>
             </div>
             <div class="flex items-center justify-between mt-2 mb-8 gap-8">
-              <Button type="submit" label="Influencer" class="w-full"></Button>
-              <Button type="submit" label="Business" class="w-full"></Button>
+              <Button type="button" label="Influencer" class="w-full" @click="redirectTo('/auth/influencer-register')"></Button>
+              <Button type="button" label="Business" class="w-full" @click="redirectTo('/auth/business-register')"></Button>
             </div>
           </div>
         </div>

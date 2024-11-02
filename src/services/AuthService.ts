@@ -1,6 +1,6 @@
 // authService.js o authService.ts
 import { httpClient } from '@/config/httpClient'
-import type { IInfluencer } from '@/interfaces/User'
+import type { IUser } from '@/interfaces/User'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
@@ -26,7 +26,7 @@ export const AuthService = {
     }
   },
 
-  async register(userData: IInfluencer) {
+  async register(userData: IUser) {
     try {
       const response = await httpClient.post('/auth/register', userData)
 

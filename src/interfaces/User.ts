@@ -1,4 +1,4 @@
-export interface IInfluencer {
+export interface IUser {
   id: string
   username: string
   firstName: string
@@ -9,19 +9,6 @@ export interface IInfluencer {
   password: string
   phone: string
   birthDate: string
-  photo: string
-  location: string
-  role: string
-}
-
-export interface IBusiness {
-  id: string
-  username: string
-  firstName: string
-  typeOfUser: string
-  ruc: string
-  email: string
-  phone: string
   photo: string
   location: string
   role: string

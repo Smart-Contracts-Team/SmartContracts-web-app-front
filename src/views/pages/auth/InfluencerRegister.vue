@@ -2,9 +2,9 @@
 import { ref, type Ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { AuthService } from '@/services/AuthService';
-import type { IInfluencer } from '@/interfaces/User';
+import type { IUser } from '@/interfaces/User';
 
-const userData = ref<IInfluencer>({
+const userData = ref<IUser>({
   id: '',
   username: '',
   firstName: '',
@@ -71,19 +71,21 @@ async function handleRegister() {
   validateField(userData.value.username, 'El nombre de usuario es obligatorio', errorValidation.usernameError);
   validateField(userData.value.firstName, 'El primer nombre es obligatorio', errorValidation.firstNameError);
   validateField(userData.value.lastName, 'El apellido es obligatorio', errorValidation.lastNameError);
-  //validateField(userData.value.ruc, 'El RUC es obligatorio', errorValidation.rucError);
+  validateField(userData.value.ruc, 'El RUC es obligatorio', errorValidation.rucError);
   validateEmail();
   validatePassword();
   validateField(userData.value.phone, 'El celular es obligatorio', errorValidation.phoneError);
-  validateField(userData.value.birthDate, 'La fecha de nacimiento es obligatoria', errorValidation.birthDateError);
-  validateField(userData.value.photo, 'La foto es obligatoria', errorValidation.photoError);
+  //validateField(userData.value.birthDate, 'La fecha de nacimiento es obligatoria', errorValidation.birthDateError);
   validateField(userData.value.location, 'La ubicación es obligatoria', errorValidation.locationError);
 
+  console.log(userData)
   // Verifica si hay errores en los campos
-  if (Object.values(errorValidation).some(ref => ref.value)) return;
+  if (Object.values(errorValidation).some(ref => ref.value)) {
+    console.log(errorValidation);
+    return;
+  }
 
   try {
-    console.log(userData)
     const response = await AuthService.register({
       id: '',
       username: userData.value.username,
@@ -95,7 +97,7 @@ async function handleRegister() {
       password: userData.value.password,
       phone: userData.value.phone,
       birthDate: userData.value.birthDate,
-      photo: userData.value.photo,
+      photo: 'user-profile.png?alt=media&token=e0e6d954-f22d-43ba-bf97-1ebd5d28e3c9',
       location: userData.value.location,
       role: 'USER'
     });
@@ -103,7 +105,7 @@ async function handleRegister() {
     console.log(response);
     if (response.success) {
       router.push('/home');
-      Object.keys(userData.value).forEach(key => userData.value[key as keyof IInfluencer] = '');
+      Object.keys(userData.value).forEach(key => userData.value[key as keyof IUser] = '');
       Object.keys(errorValidation).forEach(key => errorValidation[key as keyof typeof errorValidation].value = '');
     } else {
       registerError.value = response.message || 'Hubo un error en el registro';
@@ -151,15 +153,15 @@ async function handleRegister() {
               }}</p>
 
             <label for="firstName"
-              class="block text-surface-900 dark:text-surface-0 text-xl font-medium mb-2">FirstName</label>
-            <InputText id="firstName" v-model="userData.firstName" type="text" placeholder="FirstName"
+              class="block text-surface-900 dark:text-surface-0 text-xl font-medium mb-2">Firstname</label>
+            <InputText id="firstName" v-model="userData.firstName" type="text" placeholder="Firstname"
               class="w-full md:w-[30rem] mb-8" />
             <p v-if="errorValidation.firstNameError" class="text-red-500 text-xs mt-1">{{ errorValidation.firstNameError
               }}</p>
 
             <label for="lastName"
-              class="block text-surface-900 dark:text-surface-0 text-xl font-medium mb-2">LastName</label>
-            <InputText id="lastName" v-model="userData.lastName" type="text" placeholder="LastName"
+              class="block text-surface-900 dark:text-surface-0 text-xl font-medium mb-2">Lastname</label>
+            <InputText id="lastName" v-model="userData.lastName" type="text" placeholder="Lastname"
               class="w-full md:w-[30rem] mb-8" />
             <p v-if="errorValidation.lastNameError" class="text-red-500 text-xs mt-1">{{ errorValidation.lastNameError
               }}</p>
