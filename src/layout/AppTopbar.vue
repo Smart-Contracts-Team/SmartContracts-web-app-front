@@ -37,7 +37,9 @@ const overlayMenuItems = ref<MenuItem[]>([
 ])
 
 function toggleMenu(event: MouseEvent) {
-  menu.value.toggle(event)
+  if (menu.value) {
+    (menu.value as any).toggle(event);
+  }
 }
 </script>
 

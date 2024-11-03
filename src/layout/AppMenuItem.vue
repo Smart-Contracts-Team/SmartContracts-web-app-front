@@ -10,7 +10,7 @@ const { layoutState, setActiveMenuItem, onMenuToggle } = useLayout();
 const props = defineProps({
   item: {
     type: Object,
-    default: () => ({})
+    default: () => ({}),
   },
   index: {
     type: Number,
@@ -26,25 +26,25 @@ const props = defineProps({
   }
 });
 
-const isActiveMenu = ref(false);
-const itemKey = ref(null);
+const isActiveMenu = ref<boolean>(false);
+const itemKey = ref<string | null>(null);
 
 onBeforeMount(() => {
-  itemKey.value = props.parentItemKey ? props.parentItemKey + '-' + props.index : String(props.index);
+  itemKey.value = props.parentItemKey ? `${props.parentItemKey}-${props.index}` : String(props.index);
 
   const activeItem = layoutState.activeMenuItem;
 
-  isActiveMenu.value = activeItem === itemKey.value || activeItem ? activeItem.startsWith(itemKey.value + '-') : false;
+  isActiveMenu.value = activeItem === itemKey.value || (activeItem ? activeItem.startsWith(`${itemKey.value}-`) : false);
 });
 
 watch(
   () => layoutState.activeMenuItem,
-  (newVal) => {
-    isActiveMenu.value = newVal === itemKey.value || newVal.startsWith(itemKey.value + '-');
+  (newVal: string | null) => {
+    isActiveMenu.value = newVal === itemKey.value || (newVal ? newVal.startsWith(`${itemKey.value}-`) : false);
   }
 );
 
-function itemClick(event, item) {
+function itemClick(event: any, item: any) {
   if (item.disabled) {
     event.preventDefault();
     return;
@@ -63,7 +63,7 @@ function itemClick(event, item) {
   setActiveMenuItem(foundItemKey);
 }
 
-function checkActiveRoute(item) {
+function checkActiveRoute(item: any) {
   return route.path === item.to;
 }
 </script>
@@ -71,12 +71,12 @@ function checkActiveRoute(item) {
 <template>
   <li :class="{ 'layout-root-menuitem': root, 'active-menuitem': isActiveMenu }">
     <div v-if="root && item.visible !== false" class="layout-menuitem-root-text">{{ item.label }}</div>
-    <a v-if="(!item.to || item.items) && item.visible !== false" :href="item.url" @click="itemClick($event, item, index)" :class="item.class" :target="item.target" tabindex="0">
+    <a v-if="(!item.to || item.items) && item.visible !== false" :href="item.url" @click="itemClick($event, item)" :class="item.class" :target="item.target" tabindex="0">
       <i :class="item.icon" class="layout-menuitem-icon"></i>
       <span class="layout-menuitem-text">{{ item.label }}</span>
       <i class="pi pi-fw pi-angle-down layout-submenu-toggler" v-if="item.items"></i>
     </a>
-    <router-link v-if="item.to && !item.items && item.visible !== false" @click="itemClick($event, item, index)" :class="[item.class, { 'active-route': checkActiveRoute(item) }]" tabindex="0" :to="item.to">
+    <router-link v-if="item.to && !item.items && item.visible !== false" @click="itemClick($event, item)" :class="[item.class, { 'active-route': checkActiveRoute(item) }]" tabindex="0" :to="item.to">
       <i :class="item.icon" class="layout-menuitem-icon"></i>
       <span class="layout-menuitem-text">{{ item.label }}</span>
       <i class="pi pi-fw pi-angle-down layout-submenu-toggler" v-if="item.items"></i>

@@ -7,7 +7,7 @@ import AppTopbar from './AppTopbar.vue';
 
 const { layoutConfig, layoutState, isSidebarActive, resetMenu } = useLayout();
 
-const outsideClickListener = ref(null);
+const outsideClickListener = ref<((event: any) => void) | null>(null);
 
 watch(isSidebarActive, (newVal) => {
   if (newVal) {
@@ -29,7 +29,7 @@ const containerClass = computed(() => {
 
 function bindOutsideClickListener() {
   if (!outsideClickListener.value) {
-    outsideClickListener.value = (event) => {
+    outsideClickListener.value = (event:any) => {
       if (isOutsideClicked(event)) {
         resetMenu();
       }
@@ -40,16 +40,19 @@ function bindOutsideClickListener() {
 
 function unbindOutsideClickListener() {
   if (outsideClickListener.value) {
-    document.removeEventListener('click', outsideClickListener);
+    document.removeEventListener('click', outsideClickListener.value);
     outsideClickListener.value = null;
   }
 }
 
-function isOutsideClicked(event) {
+function isOutsideClicked(event: any) {
   const sidebarEl = document.querySelector('.layout-sidebar');
   const topbarEl = document.querySelector('.layout-menu-button');
 
-  return !(sidebarEl.isSameNode(event.target) || sidebarEl.contains(event.target) || topbarEl.isSameNode(event.target) || topbarEl.contains(event.target));
+  return !(
+    (sidebarEl && (sidebarEl.isSameNode(event.target) || sidebarEl.contains(event.target))) ||
+    (topbarEl && (topbarEl.isSameNode(event.target) || topbarEl.contains(event.target)))
+  );
 }
 </script>
 
