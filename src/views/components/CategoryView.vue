@@ -6,7 +6,7 @@ import type { IService } from '@/interfaces/Service';
 
 const services = ref<IService[]>([]);
 const props = defineProps<{ categoryName: string }>();
-const picklistServices = ref<IService[]>([]);
+const picklistServices = ref<IService[][]>([[], []]);
 const orderlistServices = ref<IService[]>([]);
 const options = ref(['grid', 'list']);
 const layout = ref('grid');
@@ -19,7 +19,6 @@ onMounted(() => {
   }).catch((error) => {
     console.error('Error fetching services:', error);
   });
-
 });
 </script>
 
