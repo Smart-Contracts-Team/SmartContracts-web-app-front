@@ -2,24 +2,29 @@
 import { onMounted, ref } from 'vue'
 import { storageBaseUrl } from '@/config/firebaseConfig'
 import { UserService } from '@/services/UserService'
+import type { IUser } from '@/interfaces/User';
 
-const user = ref<IUser[]>([])
+const user = ref<IUser | null>(null)
 const loading = ref(false)
-const isEditing  = ref(false)
+const isEditing = ref(false)
 
 const toggleEdit = () => {
-  isEditing .value = !isEditing .value
+  isEditing.value = !isEditing.value
 }
 
 const saveData = async () => {
   loading.value = true;
   try {
-    // TODO: Coordinar qué datos se pueden actualizar.
-    await UserService.updateUser(user.value);
+    if (user.value) {
+      await UserService.updateUser(user.value);
+    } else {
+      console.error('User data is null');
+    }
   } catch (error) {
     console.error('Error al actualizar el usuario:', error);
   } finally {
     loading.value = false;
+    toggleEdit()
   }
 };
 
@@ -37,6 +42,8 @@ onMounted(async () => {
 })
 </script>
 
+
+
 <template>
   <Fluid>
     <div class="flex flex-col md:flex-row gap-8">
@@ -44,7 +51,7 @@ onMounted(async () => {
         <!-- Imagen en la izquierda -->
         <div class="card flex flex-col items-center">
           <div class="font-semibold text-2xl mb-4">Profile</div>
-          <Image :src="`${storageBaseUrl}` + user.photo" alt="Image" width="250" />
+          <Image v-if="user" :src="`${storageBaseUrl}` + user.photo" alt="Image" width="250" />
         </div>
 
         <!-- Inputs en la derecha -->
@@ -52,97 +59,56 @@ onMounted(async () => {
           <div class="flex flex-col md:flex-row gap-4">
             <div class="flex flex-wrap gap-2 w-full">
               <label for="firstname">Firstname</label>
-              <InputText
-                id="firstname"
-                type="text"
-                :disabled="!isEditing "
-                :placeholder="user.firstName"
-              />
+              <InputText v-if="user" id="firstname" type="text" :disabled="!isEditing" v-model="user.firstName" />
             </div>
             <div class="flex flex-wrap gap-2 w-full">
               <label for="lastname">Lastname</label>
-              <InputText
-                id="lastname"
-                type="text"
-                :disabled="!isEditing "
-                :placeholder="user.lastName"
-              />
+              <InputText v-if="user" id="lastname" type="text" :disabled="!isEditing" v-model="user.lastName" />
             </div>
           </div>
 
           <div class="flex flex-col md:flex-row gap-4">
             <div class="flex flex-wrap gap-2 w-full">
               <label for="username">Username</label>
-              <InputText
-                id="username"
-                type="text"
-                :disabled="!isEditing "
-                :placeholder="user.username"
-              />
+              <InputText v-if="user" id="username" type="text" :disabled="!isEditing" v-model="user.username" />
             </div>
             <div class="flex flex-wrap gap-2 w-full">
               <label for="email">Email</label>
-              <InputText id="email" type="text" :disabled="!isEditing " :placeholder="user.email" />
+              <InputText v-if="user" id="email" type="text" :disabled="!isEditing" v-model="user.email" />
             </div>
           </div>
 
           <div class="flex flex-col md:flex-row gap-4">
             <div class="flex flex-wrap gap-2 w-full">
               <label for="ruc">RUC</label>
-              <InputText id="ruc" type="text" :disabled="!isEditing " :placeholder="user.ruc" />
+              <InputText v-if="user" id="ruc" type="text" :disabled="!isEditing" v-model="user.ruc" />
             </div>
             <div class="flex flex-wrap gap-2 w-full">
               <label for="phone">Phone</label>
-              <InputText id="phone" type="text" :disabled="!isEditing " :placeholder="user.phone" />
+              <InputText v-if="user" id="phone" type="text" :disabled="!isEditing" v-model="user.phone" />
             </div>
           </div>
 
           <div class="flex flex-col md:flex-row gap-4">
             <div class="flex flex-wrap gap-2 w-full">
               <label for="birthdate">Birthdate</label>
-              <InputText
-                id="birthdate"
-                type="text"
-                :disabled="!isEditing "
-                :placeholder="user.birthDate"
-              />
+              <InputText v-if="user" id="birthdate" type="text" :disabled="!isEditing" v-model="user.birthDate" />
             </div>
             <div class="flex flex-wrap gap-2 w-full">
               <label for="location">Location</label>
-              <InputText
-                id="location"
-                type="text"
-                :disabled="!isEditing "
-                :placeholder="user.location"
-              />
+              <InputText v-if="user" id="location" type="text" :disabled="!isEditing" v-model="user.location" />
             </div>
           </div>
 
           <div class="flex flex-col md:flex-row gap-4 mt-8">
             <div class="flex flex-wrap gap-2">
               <!-- Mostrar el botón de "Edit" si no está en modo edición -->
-              <Button
-                v-if="!isEditing "
-                type="button"
-                class="mr-2 mb-2"
-                label="Edit Information"
-                icon="pi pi-pencil"
-                iconPos="left"
-                :loading="loading"
-                @click="toggleEdit"
-              />
+              <Button v-if="!isEditing" type="button" class="mr-2 mb-2" label="Edit Information" icon="pi pi-pencil"
+                iconPos="left" :loading="loading" @click="toggleEdit" />
 
               <!-- Mostrar el botón de "Save" si está en modo edición -->
-              <Button
-                v-if="isEditing "
-                type="button"
-                class="mr-2 mb-2"
-                label="Save changes"
-                icon="pi pi-save"
-                iconPos="left"
-                :loading="loading"
-                @click="saveData"
-              />
+              <Button v-if="isEditing" type="button" class="mr-2 mb-2" label="Save changes" icon="pi pi-save"
+                iconPos="left" :loading="loading" @click="saveData" />
             </div>
           </div>
         </div>

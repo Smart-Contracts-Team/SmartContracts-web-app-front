@@ -49,7 +49,6 @@ async function handleLogin() {
     loginInProgress.value = true;
     // Llamada a la API de login usando el servicio
     const response = await AuthService.login(email.value, password.value);
-    console.log(response);
     if (response.success) {
       router.push('/home'); // Redirige al usuario a la página de inicio o al destino deseado
     } else {

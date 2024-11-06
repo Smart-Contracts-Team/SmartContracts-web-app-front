@@ -19,7 +19,6 @@ export const UserService = {
     return response.data.filter((user: IUser) => user.typeOfUser === type)
   },
 
-  // TODO: Coordinar qué datos se pueden actualizar.
   async updateUser(user: IUser): Promise<IUser> {
     const response = await httpClient.put(`${serviceName}/${user.id}`, user)
     return response.data
