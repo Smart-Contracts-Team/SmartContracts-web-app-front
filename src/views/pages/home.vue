@@ -8,6 +8,7 @@ import { onMounted, ref } from 'vue'
 
 const services = ref<IService[]>([])
 const business = ref<IUser[]>([])
+
 const carouselResponsiveOptions = ref([
   {
     breakpoint: '1024px',

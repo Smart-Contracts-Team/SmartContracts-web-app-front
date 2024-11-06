@@ -13,11 +13,14 @@ export const AuthService = {
         password
       })
 
+      // Guarda el ID del usuario si lo necesitas
+      localStorage.setItem('userId', response.data.id.toString())
+
       // Guarda el token en localStorage
       localStorage.setItem('token', response.data.token)
 
-      // Opcionalmente, guarda también el ID del usuario si lo necesitas
-      localStorage.setItem('userId', response.data.id.toString())
+      // Guarda el typeOfUser del usuario si lo necesitas
+      localStorage.setItem('typeOfUser', response.data.typeOfUser)
 
       return response.data
     } catch (error) {
@@ -30,11 +33,14 @@ export const AuthService = {
     try {
       const response = await httpClient.post('/auth/register', userData)
 
+      // Guarda el ID del usuario si lo necesitas
+      localStorage.setItem('userId', response.data.id.toString())
+
       // Guarda el token en localStorage
       localStorage.setItem('token', response.data.token)
 
-      // Opcionalmente, guarda también el ID del usuario si lo necesitas
-      localStorage.setItem('userId', response.data.id.toString())
+      // Guarda el typeOfUser del usuario si lo necesitas
+      localStorage.setItem('typeOfUser', response.data.typeOfUser)
 
       return response.data
     } catch (error) {
@@ -46,8 +52,9 @@ export const AuthService = {
   logout() {
     try {
       // Eliminar el token y el userId del localStorage
-      localStorage.removeItem('token')
       localStorage.removeItem('userId')
+      localStorage.removeItem('token')
+      localStorage.removeItem('typeOfUser')
 
       // Redirigir al usuario a la página de inicio de sesión
       router.push({ name: 'login' })
