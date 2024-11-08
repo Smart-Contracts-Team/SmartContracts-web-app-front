@@ -30,7 +30,7 @@ export const ServiceService = {
   async createService(service: IRegisterServiceRequestDto, userId: any): Promise<IApiResponse> {
     if (service.stars === undefined) service.stars = 1
     if (service.photo === undefined)
-      service.photo = 'user-profile.png?alt=media&token=e0e6d954-f22d-43ba-bf97-1ebd5d28e3c9'
+      service.photo = 'image-default.jpg?alt=media&token=f73cbd3b-6604-47c3-9ab8-873b928a4180'
     if (service.state === undefined) service.state = 'abierto'
     if (service.startDate === undefined) service.startDate = '2024-11-05'
     if (service.finalDate === undefined) service.finalDate = '2024-11-05'
@@ -41,9 +41,6 @@ export const ServiceService = {
   },
 
   async updateService(serviceId: string, service: IRegisterServiceRequestDto): Promise<void> {
-    if (service.photo === undefined)
-      service.photo = 'user-profile.png?alt=media&token=e0e6d954-f22d-43ba-bf97-1ebd5d28e3c9'
-    // TODO: If the image is edited, the previous image must be deleted
     const response = await httpClient.put<void>(`${serviceName}/${serviceId}`, service)
     return response.data
   },
