@@ -96,7 +96,7 @@ async function handleRegister() {
       password: userData.value.password,
       phone: userData.value.phone,
       birthDate: userData.value.birthDate,
-      photo: 'user-profile.png?alt=media&token=e0e6d954-f22d-43ba-bf97-1ebd5d28e3c9',
+      photo: 'default%2Fuser-profile.png?alt=media&token=27bd61c7-8667-48a8-b2dd-ed22a9d7807a',
       location: userData.value.location,
       role: 'USER'
     });

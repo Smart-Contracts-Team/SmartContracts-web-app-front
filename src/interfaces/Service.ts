@@ -7,9 +7,9 @@ export interface IService {
   stars: number
   photo: string
   startDate: Date
-  final_date: Date
+  finalDate: Date
   state: string
-  user_id: string
+  userId: number
   tasks: []
 }
 
@@ -28,6 +28,6 @@ export interface IRegisterServiceRequestDto {
   stars: number
   photo: string
   state: string
-  startDate: string
-  finalDate: string
+  startDate: Date
+  finalDate: Date
 }

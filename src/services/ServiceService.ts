@@ -7,13 +7,13 @@ import { PhotoService } from './PhotoService'
 const serviceName = '/service'
 
 export const ServiceService = {
-  async getServiceById(serviceId: string): Promise<IApiResponse<IService[]>> {
-    const response = await httpClient.get<IApiResponse<IService[]>>(`${serviceName}/${serviceId}`)
+  async getServiceById(serviceId: string): Promise<IService[]> {
+    const response = await httpClient.get<IService[]>(`${serviceName}/${serviceId}`)
     return response.data
   },
 
-  async getServicesByUserId(userId: number): Promise<IApiResponse<IService[]>> {
-    const response = await httpClient.get<IApiResponse<IService[]>>(`${serviceName}/user/${userId}`)
+  async getServicesByUserId(userId: number): Promise<IService[]> {
+    const response = await httpClient.get<IService[]>(`${serviceName}/user/${userId}`)
     return response.data
   },
 
@@ -30,10 +30,8 @@ export const ServiceService = {
   async createService(service: IRegisterServiceRequestDto, userId: any): Promise<IApiResponse> {
     if (service.stars === undefined) service.stars = 1
     if (service.photo === undefined)
-      service.photo = 'image-default.jpg?alt=media&token=f73cbd3b-6604-47c3-9ab8-873b928a4180'
-    if (service.state === undefined) service.state = 'abierto'
-    if (service.startDate === undefined) service.startDate = '2024-11-05'
-    if (service.finalDate === undefined) service.finalDate = '2024-11-05'
+      service.photo =
+        'default%2Fimage-default.jpg?alt=media&token=14a980fd-ef8e-4917-a243-65d90839ee44'
 
     service.userId = userId
     const response = await httpClient.post<IApiResponse>(`${serviceName}`, service)

@@ -9,6 +9,7 @@ import { FilterMatchMode } from '@primevue/core/api'
 import { PhotoService } from '@/services/PhotoService'
 import { useRouter } from 'vue-router'
 import { CategoryService } from '@/services/CategoryService'
+import { StateService } from '@/services/StatusService'
 
 const toast = useToast()
 const registerDialogVisible = ref(false)
@@ -34,10 +35,15 @@ const filters = ref({
 
 const userId = Number(localStorage.getItem('userId'))
 
-const selectedInput = ref()
-const categories = ref([])
-watch(selectedInput, (newVal) => {
+const categories = ref<any[]>([])
+const selectedCategory = ref()
+watch(selectedCategory, (newVal) => {
   newService.value.category = newVal?.display;
+});
+const stateOpts = ref<any[]>([])
+const selectedState = ref()
+watch(selectedState, (newVal) => {
+  newService.value.state = newVal?.display;
 });
 
 const errorValidation = {
@@ -78,6 +84,7 @@ const menuItems = (item: IService): MenuItem[] => [
 
 onMounted(async () => {
   categories.value = await CategoryService.getCategories()
+  stateOpts.value = await StateService.getStateOptions()
   await loadServices()
 })
 
@@ -129,11 +136,8 @@ async function saveService() {
     errorValidation.categoryError
   )
   validateField(newService.value.price, 'El Precio es obligatorio', errorValidation.priceError)
-  //validateField(newService.value.stars.toString(), 'El celular es obligatorio', errorValidation.starsError)
-  //validateField( newService.value.photo,'La foto es es obligatorio',errorValidation.photoError)
-  //validateField(newService.value.state, 'El estado es obligatorio', errorValidation.stateError)
-  //validateField(newService.value.startDate, 'La fecha de inicio es obligatoria', errorValidation.startDateError)
-  //validateField(newService.value.finalDate,  'La fecha de fin es obligatoria', errorValidation.finalDateError)
+  validateField(newService.value.startDate.toISOString().split('T')[0], 'La fecha de inicio es obligatoria', errorValidation.startDateError)
+  validateField(newService.value.finalDate.toISOString().split('T')[0],  'La fecha de fin es obligatoria', errorValidation.finalDateError)
 
   // Verifica si hay errores en los campos
   if (Object.values(errorValidation).some((ref) => ref.value)) {
@@ -437,7 +441,7 @@ function onFileSelect(event: any) {
       <div>
         <label for="category" class="block font-bold mb-3">Category</label>
         <Select
-          v-model.trim="selectedInput"
+          v-model.trim="selectedCategory"
           :options="categories"
           optionLabel="display"
           placeholder="Select a Category"
@@ -460,6 +464,46 @@ function onFileSelect(event: any) {
           fluid
         />
         <small v-if="submitted && !newService.price" class="text-red-500">Price is required.</small>
+      </div>
+
+      <div>
+        <label for="state" class="block font-bold mb-3">State</label>
+        <Select
+          v-model.trim="selectedState"
+          :options="stateOpts"
+          optionLabel="display"
+          placeholder="Select a State"
+          checkmark
+          :highlightOnSelect="false"
+          class="w-full"
+        />
+        <small v-if="submitted && !newService.state" class="text-red-500"
+          >State is required.</small
+        >
+      </div>
+
+      <div>
+        <label for="startDate" class="block font-bold mb-3">Start Date</label>
+        <DatePicker 
+          id="startDate"
+          v-model="newService.startDate"
+          required="true"
+          :invalid="submitted && !newService.startDate"
+          showIcon fluid iconDisplay="input"
+        />
+        <small v-if="submitted && !newService.startDate" class="text-red-500">Start Date is required.</small>
+      </div>
+
+      <div>
+        <label for="finalDate" class="block font-bold mb-3">Final Date</label>
+        <DatePicker 
+          id="finalDate"
+          v-model="newService.finalDate"
+          required="true"
+          :invalid="submitted && !newService.finalDate"
+          showIcon fluid iconDisplay="input"
+        />
+        <small v-if="submitted && !newService.finalDate" class="text-red-500">Final Date is required.</small>
       </div>
 
       <div>
