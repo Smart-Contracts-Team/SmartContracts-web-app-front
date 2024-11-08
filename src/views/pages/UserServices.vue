@@ -135,7 +135,7 @@ async function saveService() {
     'La categoría es obligatorio',
     errorValidation.categoryError
   )
-  validateField(newService.value.price, 'El Precio es obligatorio', errorValidation.priceError)
+  validateField(newService.value.price.toString(), 'El Precio es obligatorio', errorValidation.priceError)
   validateField(newService.value.startDate.toISOString().split('T')[0], 'La fecha de inicio es obligatoria', errorValidation.startDateError)
   validateField(newService.value.finalDate.toISOString().split('T')[0],  'La fecha de fin es obligatoria', errorValidation.finalDateError)
 
