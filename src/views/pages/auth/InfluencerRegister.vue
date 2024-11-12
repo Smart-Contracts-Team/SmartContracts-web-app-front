@@ -6,7 +6,7 @@ import type { IUser } from '@/interfaces/User';
 
 const userData = ref<IUser>({
   id: '',
-  username: '',
+  user_name: '',
   firstName: '',
   lastName: '',
   typeOfUser: '',
@@ -68,7 +68,7 @@ function validatePassword() {
 // Función para manejar el registro
 async function handleRegister() {
   // Llama a todas las funciones de validación
-  validateField(userData.value.username, 'El nombre de usuario es obligatorio', errorValidation.usernameError);
+  validateField(userData.value.user_name, 'El nombre de usuario es obligatorio', errorValidation.usernameError);
   validateField(userData.value.firstName, 'El primer nombre es obligatorio', errorValidation.firstNameError);
   validateField(userData.value.lastName, 'El apellido es obligatorio', errorValidation.lastNameError);
   validateField(userData.value.ruc, 'El RUC es obligatorio', errorValidation.rucError);
@@ -78,7 +78,6 @@ async function handleRegister() {
   //validateField(userData.value.birthDate, 'La fecha de nacimiento es obligatoria', errorValidation.birthDateError);
   validateField(userData.value.location, 'La ubicación es obligatoria', errorValidation.locationError);
 
-  console.log(userData)
   // Verifica si hay errores en los campos
   if (Object.values(errorValidation).some(ref => ref.value)) {
     console.log(errorValidation);
@@ -88,7 +87,7 @@ async function handleRegister() {
   try {
     const response = await AuthService.register({
       id: '',
-      username: userData.value.username,
+      user_name: userData.value.user_name,
       firstName: userData.value.firstName,
       lastName: userData.value.lastName,
       typeOfUser: 'Influencer',
@@ -97,7 +96,7 @@ async function handleRegister() {
       password: userData.value.password,
       phone: userData.value.phone,
       birthDate: userData.value.birthDate,
-      photo: 'user-profile.png?alt=media&token=e0e6d954-f22d-43ba-bf97-1ebd5d28e3c9',
+      photo: 'default%2Fuser-profile.png?alt=media&token=27bd61c7-8667-48a8-b2dd-ed22a9d7807a',
       location: userData.value.location,
       role: 'USER'
     });
@@ -147,7 +146,7 @@ async function handleRegister() {
           <div>
             <label for="username"
               class="block text-surface-900 dark:text-surface-0 text-xl font-medium mb-2">Username</label>
-            <InputText id="username" v-model="userData.username" type="text" placeholder="Username"
+            <InputText id="username" v-model="userData.user_name" type="text" placeholder="Username"
               class="w-full md:w-[30rem] mb-8" />
             <p v-if="errorValidation.usernameError" class="text-red-500 text-xs mt-1">{{ errorValidation.usernameError
               }}</p>

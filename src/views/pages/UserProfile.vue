@@ -70,7 +70,7 @@ onMounted(async () => {
           <div class="flex flex-col md:flex-row gap-4">
             <div class="flex flex-wrap gap-2 w-full">
               <label for="username">Username</label>
-              <InputText v-if="user" id="username" type="text" :disabled="!isEditing" v-model="user.username" />
+              <InputText v-if="user" id="username" type="text" :disabled="!isEditing" v-model="user.user_name" />
             </div>
             <div class="flex flex-wrap gap-2 w-full">
               <label for="email">Email</label>
