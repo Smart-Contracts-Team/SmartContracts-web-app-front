@@ -1,23 +1,37 @@
+import type { ITask } from './Task'
+
 export interface IService {
   id: string
-  category: string
-  description: string
-  final_date: Date
   name: string
-  photo: string
+  description: string
+  category: string
   price: number
-  start_date: Date
   stars: number
+  photo: string
+  startDate: Date
+  finalDate: Date
   state: string
-  user_id: string
+  userId: number
+  tasks: ITask[]
 }
 
 export interface IRegisteredService {
   id: number
   registeredAt: string
-  category: IService
+  data: IService
 }
 
 export interface IRegisterServiceRequestDto {
+  id?: string
+  userId: number
   name: string
+  description: string
+  category: string
+  price: number
+  stars: number
+  photo: string
+  state: string
+  startDate: Date
+  finalDate: Date
+  tasks: ITask[]
 }

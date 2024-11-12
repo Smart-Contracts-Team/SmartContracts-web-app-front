@@ -6,7 +6,7 @@ import type { IUser } from '@/interfaces/User';
 
 const userData = ref<IUser>({
   id: '',
-  username: '',
+  user_name: '',
   firstName: '',
   lastName: '',
   typeOfUser: '',
@@ -68,7 +68,7 @@ function validatePassword() {
 // Función para manejar el registro
 async function handleRegister() {
   // Llama a todas las funciones de validación
-  validateField(userData.value.username, 'El nombre de usuario es obligatorio', errorValidation.usernameError);
+  validateField(userData.value.user_name, 'El nombre de usuario es obligatorio', errorValidation.usernameError);
   validateField(userData.value.firstName, 'El primer nombre es obligatorio', errorValidation.firstNameError);
   validateField(userData.value.ruc, 'El RUC es obligatorio', errorValidation.rucError);
   validateEmail();
@@ -86,7 +86,7 @@ async function handleRegister() {
   try {
     const response = await AuthService.register({
       id: '',
-      username: userData.value.username,
+      user_name: userData.value.user_name,
       firstName: userData.value.firstName,
       lastName: userData.value.lastName,
       typeOfUser: 'Business',
@@ -145,7 +145,7 @@ async function handleRegister() {
           <div>
             <label for="username"
               class="block text-surface-900 dark:text-surface-0 text-xl font-medium mb-2">Username</label>
-            <InputText id="username" v-model="userData.username" type="text" placeholder="Username"
+            <InputText id="username" v-model="userData.user_name" type="text" placeholder="Username"
               class="w-full md:w-[30rem] mb-8" />
             <p v-if="errorValidation.usernameError" class="text-red-500 text-xs mt-1">{{ errorValidation.usernameError
               }}</p>
