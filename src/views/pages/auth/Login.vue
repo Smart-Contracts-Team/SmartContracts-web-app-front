@@ -11,6 +11,8 @@ const emailError = ref('');
 const passwordError = ref('');
 const loginError = ref('');
 
+const loginInProgress = ref(false);
+
 const router = useRouter();
 
 // Función de validación de email
@@ -42,17 +44,20 @@ async function handleLogin() {
   validateEmail();
   validatePassword();
   if (emailError.value || passwordError.value) return;
-
+  
   try {
+    loginInProgress.value = true;
     // Llamada a la API de login usando el servicio
     const response = await AuthService.login(email.value, password.value);
-    if (response.token) {
+    if (response.success) {
       router.push('/home'); // Redirige al usuario a la página de inicio o al destino deseado
     } else {
       loginError.value = 'Credenciales incorrectas';
     }
   } catch (error) {
     loginError.value = 'Error al iniciar sesión, por favor intenta de nuevo';
+  } finally {
+    loginInProgress.value = false;
   }
 }
 
@@ -111,8 +116,14 @@ function redirectTo(path:string) {
               </div>
               <span class="font-medium no-underline ml-2 text-right cursor-pointer text-primary">Forgot password?</span>
             </div>
-            <Button @click="handleLogin" type="submit" label="Sign In" class="w-full"></Button>
-            <p v-if="loginError" class="text-red-500 text-xs mt-2">{{ loginError }}</p>
+            <p v-if="loginError" class="text-red-500 text-sm mb-4">{{ loginError }}</p>
+
+            <Button 
+              :label="loginInProgress ? 'Logging in...' : 'Sign In'"
+              :disabled="loginInProgress"
+              class="w-full" 
+              @click="handleLogin"
+            />
             
             <Divider type="solid" align="center" layout="horizontal">OR</Divider>
             <div class="flex items-center justify-center">

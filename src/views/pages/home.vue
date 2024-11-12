@@ -1,13 +1,14 @@
 <script setup lang="ts">
-import { storageBaseUrl } from '@/config/firebaseConfig';
-import type { IUser } from '@/interfaces/User';
-import type { IService } from '@/interfaces/Service';
+import { storageBaseUrl } from '@/config/firebaseConfig'
+import type { IUser } from '@/interfaces/User'
+import type { IService } from '@/interfaces/Service'
 import { ServiceService } from '@/services/ServiceService'
-import { UserService } from '@/services/UserService';
+import { UserService } from '@/services/UserService'
 import { onMounted, ref } from 'vue'
 
-const services = ref<IService[]>([]);
-const business = ref<IUser[]>([]);
+const services = ref<IService[]>([])
+const business = ref<IUser[]>([])
+
 const carouselResponsiveOptions = ref([
   {
     breakpoint: '1024px',
@@ -31,14 +32,17 @@ onMounted(async () => {
     const userId = Number(localStorage.getItem('userId'))
     const response = await ServiceService.getServicesByUserId(userId)
     services.value = response
-  } catch (error) {
-    console.error(error.response ? 'Error al obtener los servicios:' : 'Token no encontrado en localStorage', error);
+  } catch (error: any) {
+    console.error(
+      error.response ? 'Error al obtener los servicios:' : 'Token no encontrado en localStorage',
+      error
+    )
   }
 
   try {
-    business.value = await UserService.getUserByType('Business');
+    business.value = await UserService.getUserByType('Business')
   } catch (error) {
-    console.error('Error al obtener las empresas:', error);
+    console.error('Error al obtener las empresas:', error)
   }
 })
 </script>

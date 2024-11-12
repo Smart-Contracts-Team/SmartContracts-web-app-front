@@ -16,12 +16,9 @@ const overlayMenuItems = ref<MenuItem[]>([
     url: '/profile'
   },
   {
-    separator: true
-  },
-  {
-    label: 'My account',
-    icon: 'pi pi-id-card',
-    to: '/account'
+    label: 'My services',
+    icon: 'pi pi-briefcase',
+    url: '/my-services'
   },
   {
     separator: true
@@ -37,7 +34,9 @@ const overlayMenuItems = ref<MenuItem[]>([
 ])
 
 function toggleMenu(event: MouseEvent) {
-  menu.value.toggle(event)
+  if (menu.value) {
+    (menu.value as any).toggle(event);
+  }
 }
 </script>
 

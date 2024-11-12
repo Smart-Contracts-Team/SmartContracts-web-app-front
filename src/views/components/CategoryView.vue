@@ -6,7 +6,7 @@ import type { IService } from '@/interfaces/Service';
 
 const services = ref<IService[]>([]);
 const props = defineProps<{ categoryName: string }>();
-const picklistServices = ref<IService[]>([]);
+const picklistServices = ref<IService[][]>([[], []]);
 const orderlistServices = ref<IService[]>([]);
 const options = ref(['grid', 'list']);
 const layout = ref('grid');
@@ -19,7 +19,6 @@ onMounted(() => {
   }).catch((error) => {
     console.error('Error fetching services:', error);
   });
-
 });
 </script>
 
@@ -61,7 +60,7 @@ onMounted(() => {
                             0px 1px 2px 0px rgba(0, 0, 0, 0.06);
                         "
                       >
-                        <span class="text-surface-900 font-medium text-sm">{{ item.starts }}</span>
+                        <span class="text-surface-900 font-medium text-sm">{{ item.stars }}</span>
                         <i class="pi pi-star-fill text-yellow-500"></i>
                       </div>
                     </div>
@@ -104,7 +103,7 @@ onMounted(() => {
                             0px 1px 2px 0px rgba(0, 0, 0, 0.06);
                         "
                       >
-                        <span class="text-surface-900 font-medium text-sm">{{ item.starts }}</span>
+                        <span class="text-surface-900 font-medium text-sm">{{ item.stars }}</span>
                         <i class="pi pi-star-fill text-yellow-500"></i>
                       </div>
                     </div>
@@ -125,15 +124,3 @@ onMounted(() => {
     </div>
   </div>
 </template>
-
-
-<!--<template>
-  <div>
-    <h1>Servicios en la categoría: {{ props.categoryName }}</h1>
-    <ul>
-      <li v-for="service in services" :key="service.id">
-        {{ service.name }}
-      </li>
-    </ul>
-  </div>
-</template>-->
