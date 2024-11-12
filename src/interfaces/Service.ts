@@ -1,3 +1,5 @@
+import type { ITask } from './Task'
+
 export interface IService {
   id: string
   name: string
@@ -10,7 +12,7 @@ export interface IService {
   finalDate: Date
   state: string
   userId: number
-  tasks: []
+  tasks: ITask[]
 }
 
 export interface IRegisteredService {
@@ -20,6 +22,7 @@ export interface IRegisteredService {
 }
 
 export interface IRegisterServiceRequestDto {
+  id?: string
   userId: number
   name: string
   description: string
@@ -30,4 +33,5 @@ export interface IRegisterServiceRequestDto {
   state: string
   startDate: Date
   finalDate: Date
+  tasks: ITask[]
 }

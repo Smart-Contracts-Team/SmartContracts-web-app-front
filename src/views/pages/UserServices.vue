@@ -38,13 +38,13 @@ const userId = Number(localStorage.getItem('userId'))
 const categories = ref<any[]>([])
 const selectedCategory = ref()
 watch(selectedCategory, (newVal) => {
-  newService.value.category = newVal?.display;
-});
+  newService.value.category = newVal?.display
+})
 const stateOpts = ref<any[]>([])
 const selectedState = ref()
 watch(selectedState, (newVal) => {
-  newService.value.state = newVal?.display;
-});
+  newService.value.state = newVal?.display
+})
 
 const errorValidation = {
   nameError: ref(''),
@@ -84,7 +84,7 @@ const menuItems = (item: IService): MenuItem[] => [
 
 onMounted(async () => {
   categories.value = await CategoryService.getCategories()
-  stateOpts.value = await StateService.getStateOptions()
+  stateOpts.value = await StateService.getServiceStateOptions()
   await loadServices()
 })
 
@@ -105,15 +105,20 @@ const groupedServices = computed(() => {
 function openNew() {
   newService.value = {} as IRegisterServiceRequestDto
   submitted.value = false
+
+  // Limpiar selects
+  selectedCategory.value = null
+  selectedState.value = null
+
   registerDialogVisible.value = true
   src.value = null
 }
 
 function hideDialog() {
-  registerDialogVisible.value = false
-  submitted.value = false
-  src.value = null
   newService.value = {} as IRegisterServiceRequestDto
+  submitted.value = false
+  registerDialogVisible.value = false
+  src.value = null
 }
 
 async function saveService() {
@@ -135,9 +140,23 @@ async function saveService() {
     'La categoría es obligatorio',
     errorValidation.categoryError
   )
-  validateField(newService.value.price.toString(), 'El Precio es obligatorio', errorValidation.priceError)
-  validateField(newService.value.startDate.toISOString().split('T')[0], 'La fecha de inicio es obligatoria', errorValidation.startDateError)
-  validateField(newService.value.finalDate.toISOString().split('T')[0],  'La fecha de fin es obligatoria', errorValidation.finalDateError)
+  validateField(
+    newService.value.price.toString(),
+    'El Precio es obligatorio',
+    errorValidation.priceError
+  )
+
+  validateField(
+    newService.value.startDate,
+    'La fecha de inicio es obligatoria',
+    errorValidation.startDateError
+  );
+
+  validateField(
+    newService.value.finalDate,
+    'La fecha de fin es obligatoria',
+    errorValidation.finalDateError
+  );
 
   // Verifica si hay errores en los campos
   if (Object.values(errorValidation).some((ref) => ref.value)) {
@@ -164,14 +183,26 @@ async function saveService() {
       }
     }
 
-    //save service
-    await ServiceService.createService(newService.value, userId)
-    toast.add({
-      severity: 'success',
-      summary: 'Success',
-      detail: 'Service Created',
-      life: 3000
-    })
+    // Aquí se verifica si estamos creando o actualizando un servicio
+    if (newService.value.id) {
+      // Actualización del servicio
+      await ServiceService.updateService(newService.value.id, newService.value)
+      toast.add({
+        severity: 'success',
+        summary: 'Success',
+        detail: 'Service Updated',
+        life: 3000
+      })
+    } else {
+      // Creación de un nuevo servicio
+      await ServiceService.createService(newService.value, userId)
+      toast.add({
+        severity: 'success',
+        summary: 'Success',
+        detail: 'Service Created',
+        life: 3000
+      })
+    }
 
     hideDialog()
 
@@ -192,6 +223,13 @@ async function saveService() {
 function editService(item: IService) {
   // Copiar el servicio seleccionado y abrir el diálogo de edición
   newService.value = { ...item }
+
+  // Encontrar el valor correspondiente en categories para asignarlo a selectedCategory
+  selectedCategory.value = categories.value.find((category) => category.display === item.category)
+
+  // Encontrar el valor correspondiente en stateOpts para asignarlo a selectedState
+  selectedState.value = stateOpts.value.find((state) => state.display === item.state)
+
   registerDialogVisible.value = true // Asegurarse de que solo se abre el diálogo de edición
 }
 
@@ -477,33 +515,39 @@ function onFileSelect(event: any) {
           :highlightOnSelect="false"
           class="w-full"
         />
-        <small v-if="submitted && !newService.state" class="text-red-500"
-          >State is required.</small
-        >
+        <small v-if="submitted && !newService.state" class="text-red-500">State is required.</small>
       </div>
 
       <div>
         <label for="startDate" class="block font-bold mb-3">Start Date</label>
-        <DatePicker 
+        <DatePicker
           id="startDate"
           v-model="newService.startDate"
           required="true"
           :invalid="submitted && !newService.startDate"
-          showIcon fluid iconDisplay="input"
+          showIcon
+          fluid
+          iconDisplay="input"
         />
-        <small v-if="submitted && !newService.startDate" class="text-red-500">Start Date is required.</small>
+        <small v-if="submitted && !newService.startDate" class="text-red-500"
+          >Start Date is required.</small
+        >
       </div>
 
       <div>
         <label for="finalDate" class="block font-bold mb-3">Final Date</label>
-        <DatePicker 
+        <DatePicker
           id="finalDate"
           v-model="newService.finalDate"
           required="true"
           :invalid="submitted && !newService.finalDate"
-          showIcon fluid iconDisplay="input"
+          showIcon
+          fluid
+          iconDisplay="input"
         />
-        <small v-if="submitted && !newService.finalDate" class="text-red-500">Final Date is required.</small>
+        <small v-if="submitted && !newService.finalDate" class="text-red-500"
+          >Final Date is required.</small
+        >
       </div>
 
       <div>

@@ -1,5 +1,5 @@
 export const StateService = {
-  async getStateOptions() {
+  async getServiceStateOptions() {
     return Promise.resolve([
       { id: 1, name: 'abierto', display: 'Abierto' },
       { id: 2, name: 'cerrado', display: 'Cerrado' },
@@ -7,9 +7,11 @@ export const StateService = {
     ])
   },
 
-  async getDisplayByName(name: string): Promise<string | undefined> {
-    const stateOptions = await this.getStateOptions()
-    const state = stateOptions.find((state) => state.name === name)
-    return state ? state.display : undefined
+  async getTaskStateOptions() {
+    return Promise.resolve([
+      { id: 1, name: 'To do', display: 'To do' },
+      { id: 2, name: 'In progress', display: 'In process' },
+      { id: 3, name: 'Done', display: 'Done' }
+    ])
   }
 }
