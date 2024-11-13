@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
+import Skeleton from 'primevue/skeleton';
 import { storageBaseUrl } from '@/config/firebaseConfig'
 import { UserService } from '@/services/UserService'
 import type { IUser } from '@/interfaces/User';
 
 const user = ref<IUser | null>(null)
+const pageReady = ref(false)
 const loading = ref(false)
 const isEditing = ref(false)
 
@@ -33,6 +35,7 @@ onMounted(async () => {
     const userId = Number(localStorage.getItem('userId'))
     const response = await UserService.getUserById(userId)
     user.value = response
+    pageReady.value = true;
   } catch (error: any) {
     console.error(
       error.response ? 'Error al obtener al usuario:' : 'Token no encontrado en localStorage',
@@ -42,10 +45,72 @@ onMounted(async () => {
 })
 </script>
 
-
-
 <template>
-  <Fluid>
+  <!-- Skeleton -->
+  <div v-if="!pageReady" class="flex flex-col md:flex-row gap-8">
+    <div class="card flex flex-row gap-8 w-full">
+      <!-- Imagen en la izquierda -->
+      <div class="card flex flex-col items-center">
+        <div class="font-semibold text-2xl mb-4">Profile</div>
+        <Skeleton shape="circle" size="15rem"></Skeleton>
+      </div>
+
+      <!-- Inputs en la derecha -->
+      <div class="flex flex-col gap-4 w-full">
+        <div class="flex flex-col md:flex-row gap-4">
+          <div class="flex flex-wrap gap-2 w-full">
+            <label for="firstname">Firstname</label>
+            <Skeleton class="mb-2" height="2.5rem"></Skeleton>
+          </div>
+          <div class="flex flex-wrap gap-2 w-full">
+            <label for="lastname">Lastname</label>
+            <Skeleton class="mb-2" height="2.5rem"></Skeleton>
+          </div>
+        </div>
+
+        <div class="flex flex-col md:flex-row gap-4">
+          <div class="flex flex-wrap gap-2 w-full">
+            <label for="username">Username</label>
+            <Skeleton class="mb-2" height="2.5rem"></Skeleton>
+          </div>
+          <div class="flex flex-wrap gap-2 w-full">
+            <label for="email">Email</label>
+            <Skeleton class="mb-2" height="2.5rem"></Skeleton>
+          </div>
+        </div>
+
+        <div class="flex flex-col md:flex-row gap-4">
+          <div class="flex flex-wrap gap-2 w-full">
+            <label for="ruc">RUC</label>
+            <Skeleton class="mb-2" height="2.5rem"></Skeleton>
+          </div>
+          <div class="flex flex-wrap gap-2 w-full">
+            <label for="phone">Phone</label>
+            <Skeleton class="mb-2" height="2.5rem"></Skeleton>
+          </div>
+        </div>
+
+        <div class="flex flex-col md:flex-row gap-4">
+          <div class="flex flex-wrap gap-2 w-full">
+            <label for="birthdate">Birthdate</label>
+            <Skeleton class="mb-2" height="2.5rem"></Skeleton>
+          </div>
+          <div class="flex flex-wrap gap-2 w-full">
+            <label for="location">Location</label>
+            <Skeleton class="mb-2" height="2.5rem"></Skeleton>
+          </div>
+        </div>
+
+        <div class="flex flex-col md:flex-row gap-4 mt-8">
+          <div class="flex flex-wrap gap-2">
+            <Skeleton width="10rem" height="2.5rem"></Skeleton>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <Fluid v-if="pageReady">
     <div class="flex flex-col md:flex-row gap-8">
       <div class="card flex flex-row gap-8 w-full">
         <!-- Imagen en la izquierda -->

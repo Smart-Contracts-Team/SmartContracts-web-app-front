@@ -366,7 +366,7 @@ function onFileSelect(event: any) {
                     <span class="text-xl font-semibold">${{ item.price }}</span>
                     <div class="flex flex-row-reverse md:flex-row gap-2">
                       <SplitButton
-                        label="View Tasks"
+                        label="View more"
                         @click="viewTasks(item.id)"
                         :model="menuItems(item)"
                       />
@@ -425,7 +425,7 @@ function onFileSelect(event: any) {
                     <span class="text-2xl font-semibold">${{ item.price }}</span>
                     <div class="flex gap-2">
                       <SplitButton
-                        label="View Tasks"
+                        label="View more"
                         @click="viewTasks(item.id)"
                         :model="menuItems(item)"
                       />
