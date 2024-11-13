@@ -32,7 +32,7 @@ const itemKey = ref<string | null>(null);
 onBeforeMount(() => {
   itemKey.value = props.parentItemKey ? `${props.parentItemKey}-${props.index}` : String(props.index);
 
-  const activeItem = layoutState.activeMenuItem;
+  const activeItem: string = layoutState.activeMenuItem || '';
 
   isActiveMenu.value = activeItem === itemKey.value || (activeItem ? activeItem.startsWith(`${itemKey.value}-`) : false);
 });
@@ -83,7 +83,7 @@ function checkActiveRoute(item: any) {
     </router-link>
     <Transition v-if="item.items && item.visible !== false" name="layout-submenu">
       <ul v-show="root ? true : isActiveMenu" class="layout-submenu">
-        <app-menu-item v-for="(child, i) in item.items" :key="child" :index="i" :item="child" :parentItemKey="itemKey" :root="false"></app-menu-item>
+        <app-menu-item v-for="(child, i) in item.items" :key="child" :index="i" :item="child" :parentItemKey="itemKey === null ? undefined : itemKey" :root="false"></app-menu-item>
       </ul>
     </Transition>
   </li>

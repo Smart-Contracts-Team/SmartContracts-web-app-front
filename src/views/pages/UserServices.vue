@@ -37,12 +37,12 @@ const userId = Number(localStorage.getItem('userId'))
 
 const categories = ref<any[]>([])
 const selectedCategory = ref()
-watch(selectedCategory, (newVal) => {
+watch(selectedCategory, (newVal:any) => {
   newService.value.category = newVal?.display
 })
 const stateOpts = ref<any[]>([])
 const selectedState = ref()
-watch(selectedState, (newVal) => {
+watch(selectedState, (newVal:any) => {
   newService.value.state = newVal?.display
 })
 
@@ -91,7 +91,7 @@ onMounted(async () => {
 // Agrupar los servicios por categoría
 const groupedServices = computed(() => {
   return registeredServices.value.reduce(
-    (acc, service) => {
+    (acc:any, service:any) => {
       if (!acc[service.category]) {
         acc[service.category] = []
       }
@@ -147,13 +147,13 @@ async function saveService() {
   )
 
   validateField(
-    newService.value.startDate,
+    newService.value.startDate.toISOString().split('T')[0],
     'La fecha de inicio es obligatoria',
     errorValidation.startDateError
   );
 
   validateField(
-    newService.value.finalDate,
+    newService.value.finalDate.toISOString().split('T')[0],
     'La fecha de fin es obligatoria',
     errorValidation.finalDateError
   );
@@ -225,10 +225,10 @@ function editService(item: IService) {
   newService.value = { ...item }
 
   // Encontrar el valor correspondiente en categories para asignarlo a selectedCategory
-  selectedCategory.value = categories.value.find((category) => category.display === item.category)
+  selectedCategory.value = categories.value.find((category:any) => category.display === item.category)
 
   // Encontrar el valor correspondiente en stateOpts para asignarlo a selectedState
-  selectedState.value = stateOpts.value.find((state) => state.display === item.state)
+  selectedState.value = stateOpts.value.find((state:any) => state.display === item.state)
 
   registerDialogVisible.value = true // Asegurarse de que solo se abre el diálogo de edición
 }
