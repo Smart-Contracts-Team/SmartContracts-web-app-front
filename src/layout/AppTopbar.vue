@@ -9,16 +9,24 @@ const { onMenuToggle, toggleDarkMode, isDarkTheme } = useLayout()
 const authService = AuthService
 
 const menu = ref(null)
+const typeOfUser = localStorage.getItem('typeOfUser')
 const overlayMenuItems = ref<MenuItem[]>([
   {
     label: 'My profile',
     icon: 'pi pi-user',
     url: '/profile'
   },
+  ...(typeOfUser === 'Influencer'
+    ? [{
+        label: 'My services',
+        icon: 'pi pi-briefcase',
+        url: '/my-services'
+      }]
+    : []),
   {
-    label: 'My services',
-    icon: 'pi pi-briefcase',
-    url: '/my-services'
+    label: 'My contracts',
+    icon: 'pi pi-file',
+    url: '/my-contracts'
   },
   {
     separator: true

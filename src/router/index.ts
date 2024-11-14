@@ -40,6 +40,11 @@ const router = createRouter({
           path: 'my-services',
           name: 'user-services',
           component: () => import('@/views/pages/UserServices.vue')
+        },
+        {
+          path: 'my-contracts',
+          name: 'user-contracts',
+          component: () => import('@/views/pages/UserContracts.vue')
         }
       ]
     },
