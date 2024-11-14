@@ -1,6 +1,7 @@
 import AppLayout from '@/layout/AppLayout.vue'
 import { createRouter, createWebHistory } from 'vue-router'
 import CategoryView from '@/views/components/CategoryView.vue'
+import TaskView from '@/views/components/TaskView.vue'
 
 const router = createRouter({
   // history: createWebHistory(import.meta.env.BASE_URL),
@@ -20,6 +21,12 @@ const router = createRouter({
           path: '/category/:categoryName',
           name: 'CategoryView',
           component: CategoryView,
+          props: true
+        },
+        {
+          path: 'task/service/:serviceId',
+          name: 'TaskView',
+          component: TaskView,
           props: true
         },
 
