@@ -1,14 +1,14 @@
 import { httpClient } from '@/config/httpClient'
 import type { IService, IRegisterServiceRequestDto } from '@/interfaces/Service'
 import { CategoryService } from './CategoryService'
-import type { IApiResponse } from '@/interfaces/common'
 import { PhotoService } from './PhotoService'
+import type { IApiResponse } from '@/interfaces/Common'
 
 const serviceName = '/service'
 
 export const ServiceService = {
-  async getServiceById(serviceId: string): Promise<IService[]> {
-    const response = await httpClient.get<IService[]>(`${serviceName}/${serviceId}`)
+  async getServiceById(serviceId: number): Promise<IService> {
+    const response = await httpClient.get<IService>(`${serviceName}/${serviceId}`)
     return response.data
   },
 
@@ -18,13 +18,8 @@ export const ServiceService = {
   },
 
   async getServicesByCategoryName(categoryName: string): Promise<IService[]> {
-    const displayName = await CategoryService.getDisplayByName(categoryName)
-    if (!displayName) {
-      throw new Error(`No se encontró la categoría con el nombre: ${categoryName}`)
-    }
-
-    const response = await httpClient.get<IService[]>(`${serviceName}/category/${displayName}`)
-    return response.data.filter((service: IService) => service.category === displayName)
+    const response = await httpClient.get<IService[]>(`${serviceName}/category/${categoryName}`)
+    return response.data.filter((service: IService) => service.category === categoryName)
   },
 
   async createService(service: IRegisterServiceRequestDto, userId: any): Promise<IApiResponse> {
@@ -38,12 +33,12 @@ export const ServiceService = {
     return response.data
   },
 
-  async updateService(serviceId: string, service: IRegisterServiceRequestDto): Promise<void> {
+  async updateService(serviceId: number, service: IRegisterServiceRequestDto): Promise<void> {
     const response = await httpClient.put<void>(`${serviceName}/${serviceId}`, service)
     return response.data
   },
 
-  async deleteService(serviceId: string): Promise<IApiResponse> {
+  async deleteService(serviceId: number): Promise<IApiResponse> {
     /* Obtener todas las tareas asociadas al servicio
     const tasks = await TaskService.getTasksByServiceId(serviceId);
 

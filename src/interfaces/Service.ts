@@ -1,7 +1,7 @@
 import type { ITask } from './Task'
 
 export interface IService {
-  id: string
+  id: number
   name: string
   description: string
   category: string
@@ -22,7 +22,7 @@ export interface IRegisteredService {
 }
 
 export interface IRegisterServiceRequestDto {
-  id?: string
+  id?: number
   userId: number
   name: string
   description: string
