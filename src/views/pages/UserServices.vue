@@ -37,6 +37,8 @@ const userId = Number(localStorage.getItem('userId'))
 
 const categories = ref<any[]>([])
 const selectedCategory = ref()
+
+// TODO: No se ve la categoría al editar
 watch(selectedCategory, (newVal:any) => {
   newService.value.category = newVal?.display
 })
@@ -57,8 +59,14 @@ const errorValidation = {
 }
 
 // Funciónes de validación
-function validateField(value: string, errorMsg: string, errorRef: Ref<string>) {
-  if (!value) {
+function validateField(value: string | number | Date, errorMsg: string, errorRef: Ref<string>) {
+  if (
+    value === null || 
+    value === undefined ||
+    (typeof value === 'string' && value.trim() === '') ||
+    (typeof value === 'number' && isNaN(value)) ||
+    (value instanceof Date && isNaN(value.getTime()))
+  ) {
     errorRef.value = errorMsg
   } else {
     errorRef.value = ''
@@ -141,19 +149,19 @@ async function saveService() {
     errorValidation.categoryError
   )
   validateField(
-    newService.value.price.toString(),
+    newService.value.price,
     'El Precio es obligatorio',
     errorValidation.priceError
   )
 
   validateField(
-    newService.value.startDate.toISOString().split('T')[0],
+    newService.value.startDate,
     'La fecha de inicio es obligatoria',
     errorValidation.startDateError
   );
 
   validateField(
-    newService.value.finalDate.toISOString().split('T')[0],
+    newService.value.finalDate,
     'La fecha de fin es obligatoria',
     errorValidation.finalDateError
   );
