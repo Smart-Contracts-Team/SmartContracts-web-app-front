@@ -10,7 +10,7 @@ export const UserService = {
   },
 
   async getUserById(userId: number): Promise<IUser> {
-    const response = await httpClient.get(`${serviceName}/${userId}`)
+    const response = await httpClient.get<IUser>(`${serviceName}/${userId}`)
     return response.data
   },
 

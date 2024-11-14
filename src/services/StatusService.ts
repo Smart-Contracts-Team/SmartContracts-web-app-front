@@ -1,17 +1,27 @@
 export const StateService = {
+  async getContractStateOptions() {
+    return Promise.resolve([
+      { id: 1, name: 'active', display: 'Active' },
+      { id: 2, name: 'pending', display: 'Pending' },
+      { id: 3, name: 'cancel', display: 'Cancel' }
+    ])
+  },
+
   async getServiceStateOptions() {
     return Promise.resolve([
-      { id: 1, name: 'abierto', display: 'Abierto' },
-      { id: 2, name: 'cerrado', display: 'Cerrado' },
-      { id: 3, name: 'ocupado', display: 'Ocupado' }
+      { id: 1, name: 'active', display: 'Active' },
+      { id: 2, name: 'in-process', display: 'In Process' },
+      { id: 3, name: 'pending', display: 'Pending' },
+      { id: 3, name: 'done', display: 'Done' }
     ])
   },
 
   async getTaskStateOptions() {
     return Promise.resolve([
-      { id: 1, name: 'To do', display: 'To do' },
-      { id: 2, name: 'In progress', display: 'In process' },
-      { id: 3, name: 'Done', display: 'Done' }
+      { id: 1, name: 'to-do', display: 'To do' },
+      { id: 2, name: 'in-process', display: 'In process' },
+      { id: 2, name: 'pending', display: 'Pending' },
+      { id: 3, name: 'done', display: 'Done' }
     ])
   }
 }

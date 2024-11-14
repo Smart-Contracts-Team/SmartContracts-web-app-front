@@ -21,6 +21,11 @@ const overlayMenuItems = ref<MenuItem[]>([
     url: '/my-services'
   },
   {
+    label: 'My contracts',
+    icon: 'pi pi-file',
+    url: '/my-contracts'
+  },
+  {
     separator: true
   },
   {

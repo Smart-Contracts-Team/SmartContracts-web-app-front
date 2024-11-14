@@ -12,10 +12,11 @@ const options = ref(['grid', 'list']);
 const layout = ref('grid');
 
 onMounted(() => {
-  ServiceService.getServicesByCategoryName(props.categoryName).then((data) => {
+  ServiceService.getServicesByCategoryName("marketing").then((data) => {
     services.value = data.slice(0, 6);
     picklistServices.value = [data, []];
     orderlistServices.value = data;
+    console.log(services.value)
   }).catch((error) => {
     console.error('Error fetching services:', error);
   });
