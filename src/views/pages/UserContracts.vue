@@ -52,14 +52,13 @@ watch(selectedInfluencer, async (newVal: any) => {
     // Aquí obtenemos los servicios del influencer seleccionado
     try {
       const services = await ServiceService.getServicesByUserId(newVal.id)
-      servicesList.value = services
-        .map((service) => ({
-          id: service.id,
-          name: service.name,
-          status: service.state,
-          price: service.price
-        }))
-        .filter((service) => service.status == 'active')
+      servicesList.value = services.map((service) => ({
+        id: service.id,
+        name: service.name,
+        status: service.state,
+        price: service.price
+      }))
+      //.filter((service) => service.status == 'active')
     } catch (error) {
       console.error('Error fetching services:', error)
       toast.add({
@@ -219,21 +218,33 @@ function editContract(item: IContract) {
 
 async function loadContracts() {
   photoLoaded.value = false
+  loadingList.value = true
+
   try {
-    loadingList.value = true
-    const response = await ContractService.getContractsByInfluencerId(userId)
-    registeredContracts.value = response
+    const response = userType === 'Influencer'
+      ? await ContractService.getContractsByInfluencerId(userId)
+      : await ContractService.getContractsByBusinessId(userId)
 
     registeredContracts.value = await Promise.all(
       response.map(async (contract) => {
-        const business = await UserService.getUserById(contract.businessId)
-        return {
-          ...contract,
-          businessName: business.firstName,
-          businessPhoto: business.photo
+        const userIdToFetch = userType === 'Influencer' ? contract.businessId : contract.influencerId
+        const user = await UserService.getUserById(userIdToFetch)        
+        if (userIdToFetch === contract.businessId) {
+          return {
+            ...contract,
+            name: user.user_name,
+            photo: user.photo
+          }
+        } else {
+          return {
+            ...contract,
+            name: user.firstName,
+            photo: user.photo
+          }
         }
       })
     )
+
     photoLoaded.value = true
   } catch (error) {
     toast.add({
@@ -244,7 +255,6 @@ async function loadContracts() {
     })
   } finally {
     loadingList.value = false
-    photoLoaded.value = true
   }
 }
 
@@ -319,18 +329,18 @@ const getStatusLabel = (status: string) => {
       </template>
       <Column expander style="width: 2rem" />
       <Column field="title" header="Title" sortable></Column>
-      <Column header="Business" field="businessName" sortable>
+      <Column :header="userType === 'Influencer' ? 'Business' : 'Influencer'" field="name" sortable>
         <template #body="{ data }">
           <div class="flex items-center gap-2">
             <img
               v-if="photoLoaded"
-              :alt="data.businessName"
-              :src="`${storageBaseUrl}` + data.businessPhoto"
+              :alt="data.name"
+              :src="`${storageBaseUrl}` + data.photo"
               style="width: 32px; height: 32px"
             />
             <!-- Si la imagen aún no ha cargado, mostramos el skeleton -->
             <Skeleton v-else shape="circle" size="32" />
-            <span>{{ data.businessName }}</span>
+            <span>{{ data.name }}</span>
           </div>
         </template>
       </Column>
