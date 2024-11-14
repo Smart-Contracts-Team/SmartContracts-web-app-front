@@ -3,6 +3,7 @@ import { onMounted, ref } from 'vue';
 import { storageBaseUrl } from '@/config/firebaseConfig';
 import { ServiceService } from '@/services/ServiceService';
 import type { IService } from '@/interfaces/Service';
+import { CategoryService } from '@/services/CategoryService';
 
 const services = ref<IService[]>([]);
 const props = defineProps<{ categoryName: string }>();
@@ -10,23 +11,29 @@ const picklistServices = ref<IService[][]>([[], []]);
 const orderlistServices = ref<IService[]>([]);
 const options = ref(['grid', 'list']);
 const layout = ref('grid');
+const categoryDisplayName = ref('');
 
-onMounted(() => {
-  ServiceService.getServicesByCategoryName("marketing").then((data) => {
+onMounted(async () => {
+  try {
+    // Buscar el nombre de la categoría en display
+    categoryDisplayName.value = 
+      (await CategoryService.getCategories()).find(category => category.name === props.categoryName)?.display || props.categoryName;
+
+    // Obtener los servicios de la categoría
+    const data = await ServiceService.getServicesByCategoryName(props.categoryName);
     services.value = data.slice(0, 6);
     picklistServices.value = [data, []];
     orderlistServices.value = data;
-    console.log(services.value)
-  }).catch((error) => {
-    console.error('Error fetching services:', error);
-  });
+  } catch (error) {
+    console.error('Error fetching services or category display name:', error);
+  }
 });
 </script>
 
 <template>
   <div class="flex flex-col">
     <div class="card">
-      <div class="font-semibold text-xl">Servicios en la categoría: {{ props.categoryName }}</div>
+      <div class="font-semibold text-xl">Servicios en la categoría: {{ categoryDisplayName  }}</div>
       <DataView :value="services" :layout="layout">
         <template #header>
           <div class="flex justify-end">

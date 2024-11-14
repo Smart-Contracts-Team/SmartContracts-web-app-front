@@ -29,6 +29,8 @@ export const ServiceService = {
         'default%2Fimage-default.jpg?alt=media&token=14a980fd-ef8e-4917-a243-65d90839ee44'
 
     service.userId = userId
+    service.category = (await CategoryService.getCategoryName(service.category || '')) || ''
+
     const response = await httpClient.post<IApiResponse>(`${serviceName}`, service)
     return response.data
   },

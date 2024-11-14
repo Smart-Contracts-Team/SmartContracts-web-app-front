@@ -21,6 +21,7 @@ export interface IRegisteredContract {
 }
 
 export interface IRegisterContractRequestDto {
+  id?: number
   title: string
   description: string
   startDate: Date

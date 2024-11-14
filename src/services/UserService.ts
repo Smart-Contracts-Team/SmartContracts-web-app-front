@@ -15,7 +15,7 @@ export const UserService = {
   },
 
   async getUserByType(type: string): Promise<IUser[]> {
-    const response = await httpClient.get<[]>(`${serviceName}`)
+    const response = await httpClient.get<IUser[]>(`${serviceName}`)
     return response.data.filter((user: IUser) => user.typeOfUser === type)
   },
 
