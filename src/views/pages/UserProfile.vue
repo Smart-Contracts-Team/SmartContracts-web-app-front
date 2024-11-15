@@ -113,13 +113,11 @@ onMounted(async () => {
   <Fluid v-if="pageReady">
     <div class="flex flex-col md:flex-row gap-8">
       <div class="card flex flex-col md:flex-row gap-8 w-full">
-        <!-- Imagen en la izquierda -->
         <div class="card flex flex-col items-center">
           <div class="font-semibold text-2xl mb-4">Profile</div>
           <Image v-if="user" :src="`${storageBaseUrl}` + user.photo" alt="Image" width="250" />
         </div>
 
-        <!-- Inputs en la derecha -->
         <div class="flex flex-col gap-4 w-full">
           <div class="flex flex-col md:flex-row gap-4">
             <div class="flex flex-wrap gap-2 w-full">

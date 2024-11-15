@@ -52,8 +52,8 @@ const getSeverity = (status: string) => {
 
 <template>
   <Fluid>
-    <!-- Información del Servicio -->
     <div class="flex flex-col md:flex-row gap-8">
+      <!-- Información del Servicio -->
       <div class="card flex flex-col md:flex-row gap-8 w-full">
         <div class="flex flex-col gap-4 w-full">
           <div class="flex flex-wrap gap-2 w-full">
@@ -76,6 +76,23 @@ const getSeverity = (status: string) => {
 
         <div class="flex flex-col gap-4 w-full">
           <div class="flex flex-wrap gap-2 w-full mb-8"></div>
+
+          <div class="flex items-center gap-2">
+            <Avatar
+              image="https://primefaces.org/cdn/primevue/images/avatar/amyelsner.png"
+              shape="circle"
+              class="cursor-pointer"
+              @click="$router.push(`/user-information/${service.userId}`)"
+            />
+            <span
+              v-if="service"
+              id="influencer"
+              class="cursor-pointer"
+              type="text"
+              @click="$router.push(`/user-information/${service.userId}`)"
+              >{{ service.userId }}</span
+            >
+          </div>
 
           <div class="flex flex-wrap gap-2 w-full">
             <label for="description" class="font-bold">Description:</label>
@@ -120,7 +137,8 @@ const getSeverity = (status: string) => {
     </div>
 
     <div class="flex flex-col gap-8 w-full">
-      <div class="card w-full">
+      <!-- Lista de tareas -->
+      <div class="card w-full mt-8">
         <DataTable :value="tasks" tableStyle="min-width: 50rem" stripedRows>
           <template #header>
             <div class="flex flex-wrap items-center justify-between gap-2">
