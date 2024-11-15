@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { FilterMatchMode } from '@primevue/core/api'
 import { useToast } from 'primevue/usetoast'
-import { onMounted, ref, watch, type Ref } from 'vue'
+import { computed, onMounted, ref, watch, type Ref } from 'vue'
 import { ContractService } from '@/services/ContractService'
 import type { IContract, IRegisterContractRequestDto } from '@/interfaces/Contract'
 import { UserService } from '@/services/UserService'
@@ -13,15 +13,23 @@ const filters = ref({
   global: { value: null, matchMode: FilterMatchMode.CONTAINS }
 })
 
+const options = ref(['All', 'Pending'])
+const selectedFilter = ref('All')
+
 const submitted = ref(false)
 const newContract = ref<IRegisterContractRequestDto>({} as IRegisterContractRequestDto)
 const registerDialogVisible = ref(false)
 const registeringContract = ref(false)
 
+const confirmDialogVisible = ref(false)
+const selectedContract = ref<IContract | null>(null)
+const checked = ref(false)
+
 const toast = useToast()
 const expandedRows = ref<number[]>([])
 const loadingList = ref(false)
 const photoLoaded = ref(false)
+const updatingStatus = ref(false)
 const userId = Number(localStorage.getItem('userId') ?? 0)
 const influencerId = ref<number>()
 const userType = String(localStorage.getItem('typeOfUser') ?? 'Undefined')
@@ -74,18 +82,6 @@ watch(selectedInfluencer, async (newVal: any) => {
   }
 })
 
-// Define la función para calcular el precio total de los servicios seleccionados
-function calculateTotalPrice() {
-  // Asegúrate de que se estén utilizando los valores correctos para el cálculo
-  if (newContract.value.services && newContract.value.services.length > 0) {
-    const total = newContract.value.services.reduce((acc, service) => {
-      return acc + (service.price || 0)
-    }, 0)
-    return total
-  }
-  return 0
-}
-
 onMounted(async () => {
   typeOpts.value = await CategoryService.getCategories()
   influencersList.value = (await UserService.getUserByType('Influencer')).map((influencer) => ({
@@ -118,11 +114,40 @@ const errorValidation = {
 }
 
 // Funciónes de validación
-function validateField(value: string | any[], errorMsg: string, errorRef: Ref<string>) {
-  if (!value || (Array.isArray(value) && value.length === 0)) {
-    errorRef.value = errorMsg
+function validateField(
+  value: string | number | Date | any[],
+  errorMsg: string,
+  errorRef: Ref<string>
+) {
+  if (Array.isArray(value)) {
+    // Si 'value' es un arreglo, validamos cada elemento.
+    const invalidElement = value.some(
+      (item) =>
+        item === null ||
+        item === undefined ||
+        (typeof item === 'string' && item.trim() === '') ||
+        (typeof item === 'number' && isNaN(item)) ||
+        (item instanceof Date && isNaN(item.getTime()))
+    )
+
+    if (invalidElement) {
+      errorRef.value = errorMsg
+    } else {
+      errorRef.value = ''
+    }
   } else {
-    errorRef.value = ''
+    // Validación original para un solo valor.
+    if (
+      value === null ||
+      value === undefined ||
+      (typeof value === 'string' && value.trim() === '') ||
+      (typeof value === 'number' && isNaN(value)) ||
+      (value instanceof Date && isNaN(value.getTime()))
+    ) {
+      errorRef.value = errorMsg
+    } else {
+      errorRef.value = ''
+    }
   }
 }
 
@@ -142,18 +167,18 @@ async function saveContract() {
   )
   validateField(newContract.value.type, 'La categoría es obligatorio', errorValidation.typeError)
   validateField(
-    newContract.value.influencerId.toString(),
+    newContract.value.influencerId,
     'El influencer es obligatorio',
     errorValidation.typeError
   )
   validateField(newContract.value.services, 'El servicio es obligatorio', errorValidation.typeError)
   validateField(
-    newContract.value.startDate.toISOString().split('T')[0],
+    newContract.value.startDate,
     'La fecha de inicio es obligatoria',
     errorValidation.startDateError
   )
   validateField(
-    newContract.value.finalDate.toISOString().split('T')[0],
+    newContract.value.finalDate,
     'La fecha de fin es obligatoria',
     errorValidation.finalDateError
   )
@@ -221,14 +246,16 @@ async function loadContracts() {
   loadingList.value = true
 
   try {
-    const response = userType === 'Influencer'
-      ? await ContractService.getContractsByInfluencerId(userId)
-      : await ContractService.getContractsByBusinessId(userId)
+    const response =
+      userType === 'Influencer'
+        ? await ContractService.getContractsByInfluencerId(userId)
+        : await ContractService.getContractsByBusinessId(userId)
 
     registeredContracts.value = await Promise.all(
       response.map(async (contract) => {
-        const userIdToFetch = userType === 'Influencer' ? contract.businessId : contract.influencerId
-        const user = await UserService.getUserById(userIdToFetch)        
+        const userIdToFetch =
+          userType === 'Influencer' ? contract.businessId : contract.influencerId
+        const user = await UserService.getUserById(userIdToFetch)
         if (userIdToFetch === contract.businessId) {
           return {
             ...contract,
@@ -258,6 +285,70 @@ async function loadContracts() {
   }
 }
 
+// Define la función para calcular el precio total de los servicios seleccionados
+function calculateTotalPrice() {
+  // Asegúrate de que se estén utilizando los valores correctos para el cálculo
+  if (newContract.value.services && newContract.value.services.length > 0) {
+    const total = newContract.value.services.reduce((acc, service) => {
+      return acc + (service.price || 0)
+    }, 0)
+    return total
+  }
+  return 0
+}
+
+const filteredContracts = computed(() => {
+  return selectedFilter.value === 'Pending'
+    ? registeredContracts.value.filter((contract) => contract.status === 'pending')
+    : registeredContracts.value
+})
+
+function editStatus(contract: IContract) {
+  if (contract.status === 'pending') {
+    selectedContract.value = contract
+    confirmDialogVisible.value = true
+  } else {
+    toast.add({
+      severity: 'warn',
+      summary: 'Cannot Edit Status',
+      detail: 'Only pending contracts can be updated.',
+      life: 3000
+    })
+  }
+}
+
+function confirmStatusChange() {
+  if (selectedContract.value) {
+    updatingStatus.value = true
+    selectedContract.value.status = 'active' // Cambiar el estado del contrato
+    ContractService.updateContract(selectedContract.value.id, selectedContract.value)
+      .then(() => {
+        toast.add({
+          severity: 'success',
+          summary: 'Status Updated',
+          detail: `Contract status updated to ${selectedContract.value?.status}`,
+          life: 3000
+        })
+      })
+      .catch((error) => {
+        toast.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: `Error updating status: ${(error as Error).message}`,
+          life: 3000
+        })
+      })
+      .finally(() => {
+        confirmDialogVisible.value = false
+        updatingStatus.value = false
+      })
+  }
+}
+
+function cancelStatusChange() {
+  confirmDialogVisible.value = false
+}
+
 function expandAll() {
   expandedRows.value = registeredContracts.value.map((contract) => contract.id)
 }
@@ -268,7 +359,7 @@ function collapseAll() {
 
 function formatCurrency(value: number) {
   if (value == null || isNaN(value)) {
-    return '$0.00' // Default value if the price is invalid
+    return '$0.00'
   }
   return value.toLocaleString('en-US', { style: 'currency', currency: 'USD' })
 }
@@ -282,7 +373,7 @@ const getStatusLabel = (status: string) => {
     case 'cancel':
       return { severity: 'danger', label: 'Cancel' }
     default:
-      return { severity: 'secondary', label: 'Undefined' } // Valor por defecto
+      return { severity: 'secondary', label: 'Undefined' }
   }
 }
 </script>
@@ -290,13 +381,14 @@ const getStatusLabel = (status: string) => {
 <template>
   <div class="card">
     <div class="font-semibold text-xl mb-4">Contracts List</div>
+
     <!-- <DataTable v-model:expandedRows="expandedRows" :value="registeredContracts" dataKey="id"
             tableStyle="min-width: 60rem" stripedRows paginator :rows="10" :rowsPerPageOptions="[10, 20, 50]"
             paginatorTemplate="RowsPerPageDropdown FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
             currentPageReportTemplate="{first} to {last} of {totalRecords}"></DataTable> -->
     <DataTable
       v-model:expandedRows="expandedRows"
-      :value="registeredContracts"
+      :value="filteredContracts"
       dataKey="id"
       removableSort
       :filters="filters"
@@ -308,6 +400,7 @@ const getStatusLabel = (status: string) => {
     >
       <template #header>
         <div class="flex justify-between">
+          <!-- Botón para agregar nuevos contratos -->
           <Button
             v-if="userType === 'Business'"
             label="New"
@@ -315,12 +408,19 @@ const getStatusLabel = (status: string) => {
             class="mr-2"
             @click="openNew"
           />
+
+          <!-- Seleccionar ver todos o solo los pendientes -->
+          <SelectButton v-model="selectedFilter" :options="options" class="mr-2" />
+
+          <!-- Buscador general -->
           <IconField>
             <InputIcon>
               <i class="pi pi-search" />
             </InputIcon>
             <InputText v-model="filters['global'].value" placeholder="Search..." />
-          </IconField>
+          </IconField>          
+
+          <!-- Botones de expansión y colapso -->
           <div class="flex flex-wrap justify-end gap-2">
             <Button text icon="pi pi-plus" label="Expand All" @click="expandAll" />
             <Button text icon="pi pi-minus" label="Collapse All" @click="collapseAll" />
@@ -352,11 +452,20 @@ const getStatusLabel = (status: string) => {
       <Column field="startDate" header="Start Date" sortable></Column>
       <Column field="finalDate" header="Final Date" sortable></Column>
       <Column field="type" header="Type" sortable></Column>
-      <Column field="status" header="Status" sortable style="min-width: 12rem">
+      <Column field="status" header="Status" sortable>
         <template #body="slotProps">
           <Tag
             :value="getStatusLabel(slotProps.data.status).label"
             :severity="getStatusLabel(slotProps.data.status).severity"
+          /> </template
+      ></Column>
+      <Column v-if="userType == 'Influencer'" header="Actions">
+        <template #body="{ data }">
+          <Button
+            v-if="data.status == 'pending'"
+            label="Accept"
+            class="p-button-primary"
+            @click="editStatus(data)"
           />
         </template>
       </Column>
@@ -507,6 +616,85 @@ const getStatusLabel = (status: string) => {
         :loading="registeringContract"
         :disabled="registeringContract"
         @click="saveContract"
+      />
+    </template>
+  </Dialog>
+
+  <!-- Confirm Dialog -->
+  <Dialog
+    v-model:visible="confirmDialogVisible"
+    header="Confirm Acceptance of Contract"
+    modal
+    :style="{ width: '50rem' }"
+    :breakpoints="{ '1199px': '75vw', '575px': '90vw' }"
+    :closable="false"
+    :draggable="false"
+  >
+    <p class="mb-8">
+      Antes de aceptar este contrato, le solicitamos que lea atentamente todos los términos y
+      condiciones establecidos en el mismo. Al aceptar el contrato, usted está confirmando que
+      comprende completamente los servicios y tareas que se le asignarán, los cuales están
+      detalladamente especificados en el documento. Asegúrese de estar conforme con las
+      responsabilidades y expectativas que conlleva el contrato, ya que cualquier incumplimiento
+      podría generar consecuencias.
+    </p>
+
+    <p class="mb-2 font-bold text-xl">Responsabilidad de Cancelación</p>
+    <p class="mb-8">
+      SmartContracts no se hace responsable por la cancelación de este contrato. En caso de que
+      desee cancelar o modificar los términos acordados, es fundamental que se comunique
+      directamente con la empresa solicitante. Ambas partes deberán llegar a un acuerdo mutuo sobre
+      la cancelación, de acuerdo con lo estipulado en el contrato.
+    </p>
+
+    <p class="mb-2 font-bold text-xl">Compromiso y Confidencialidad</p>
+    <p class="mb-8">
+      Es importante destacar que este contrato puede implicar la divulgación de información sensible
+      o exclusiva. Por lo tanto, se espera que mantenga la confidencialidad respecto a cualquier
+      información relacionada con la empresa contratante y el alcance de los servicios que se le
+      soliciten. Cualquier incumplimiento en este aspecto podría generar penalizaciones o la
+      terminación del contrato de manera anticipada.
+    </p>
+
+    <p class="mb-2 font-bold text-xl">Condiciones Adicionales</p>
+    <p class="mb-8">
+      Además, le recordamos que la naturaleza de los contratos SmartContracts implica una ejecución
+      automática de los términos una vez que ambas partes han dado su consentimiento. De esta
+      manera, SmartContracts actúa como un facilitador para que el acuerdo sea validado de forma
+      segura y transparente.
+    </p>
+
+    <p class="mb-8">
+      Le recomendamos que, en caso de tener dudas sobre algún aspecto del contrato, consulte con un
+      abogado o experto legal antes de proceder con la aceptación. Al aceptar el contrato, usted
+      está comprometido con los términos aquí expuestos y será responsable de cumplir con todas las
+      obligaciones acordadas.
+    </p>
+
+    <p class="mb-2 font-bold text-xl">
+      Asegúrese de leer todo el contrato cuidadosamente antes de aceptar.
+    </p>
+
+    <p class="mb-8">
+      Si está de acuerdo con los términos y condiciones detallados, puede proceder con la
+      aceptación.
+    </p>
+
+    <div class="flex items-center gap-2">
+      <Checkbox v-model="checked" :invalid="!checked" binary />
+      <label for="size_normal" class="size_normal"
+        >Acepto los términos y condiciones del contrato.</label
+      >
+    </div>
+
+    <template #footer>
+      <Button label="Cancel" icon="pi pi-times" @click="cancelStatusChange" />
+      <Button
+        icon="pi pi-check"
+        :label="updatingStatus ? 'Updating...' : 'Confirm'"
+        :loading="updatingStatus"
+        :disabled="updatingStatus || !checked"
+        @click="confirmStatusChange"
       />
     </template>
   </Dialog>

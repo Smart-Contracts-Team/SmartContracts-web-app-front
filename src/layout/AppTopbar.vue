@@ -4,6 +4,7 @@ import ThemeSelector from './ThemeSelector.vue'
 import { ref } from 'vue'
 import type { MenuItem } from 'primevue/menuitem';
 import { AuthService } from '@/services/AuthService';
+import router from '@/router';
 
 const { onMenuToggle, toggleDarkMode, isDarkTheme } = useLayout()
 const authService = AuthService
@@ -24,11 +25,6 @@ const overlayMenuItems = ref<MenuItem[]>([
       }]
     : []),
   {
-    label: 'My contracts',
-    icon: 'pi pi-file',
-    url: '/my-contracts'
-  },
-  {
     separator: true
   },
   {
@@ -45,6 +41,12 @@ function toggleMenu(event: MouseEvent) {
   if (menu.value) {
     (menu.value as any).toggle(event);
   }
+}
+
+function goToContracts() {
+  router.push({
+    path: '/my-contracts'
+  });
 }
 </script>
 
@@ -96,9 +98,9 @@ function toggleMenu(event: MouseEvent) {
 
       <div class="layout-topbar-menu hidden lg:block">
         <div class="layout-topbar-menu-content">
-          <button type="button" class="layout-topbar-action">
+          <button v-tooltip.bottom="'Ver contratos'" type="button" class="layout-topbar-action" @click="goToContracts()">
             <i class="pi pi-inbox"></i>
-            <span>Messages</span>
+            <span>Contracts</span>
           </button>
           <Menu ref="menu" :model="overlayMenuItems" :popup="true" />
           <button type="button" class="layout-topbar-action" @click="toggleMenu">

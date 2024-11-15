@@ -30,7 +30,7 @@ const src = ref<string | null>(null) // Para la vista previa de la imagen
 const options = ref(['list', 'grid'])
 const layout = ref('list')
 const filters = ref({
-  global: { value: null, matchMode: FilterMatchMode.CONTAINS }
+  global: { value: '' as string, matchMode: FilterMatchMode.CONTAINS }
 })
 
 const userId = Number(localStorage.getItem('userId'))
@@ -38,13 +38,12 @@ const userId = Number(localStorage.getItem('userId'))
 const categories = ref<any[]>([])
 const selectedCategory = ref()
 
-// TODO: No se ve la categoría al editar
-watch(selectedCategory, (newVal:any) => {
+watch(selectedCategory, (newVal: any) => {
   newService.value.category = newVal?.display
 })
 const stateOpts = ref<any[]>([])
 const selectedState = ref()
-watch(selectedState, (newVal:any) => {
+watch(selectedState, (newVal: any) => {
   newService.value.state = newVal?.display
 })
 
@@ -61,7 +60,7 @@ const errorValidation = {
 // Funciónes de validación
 function validateField(value: string | number | Date, errorMsg: string, errorRef: Ref<string>) {
   if (
-    value === null || 
+    value === null ||
     value === undefined ||
     (typeof value === 'string' && value.trim() === '') ||
     (typeof value === 'number' && isNaN(value)) ||
@@ -98,16 +97,15 @@ onMounted(async () => {
 
 // Agrupar los servicios por categoría
 const groupedServices = computed(() => {
-  return registeredServices.value.reduce(
-    (acc:any, service:any) => {
-      if (!acc[service.category]) {
-        acc[service.category] = []
-      }
-      acc[service.category].push(service)
-      return acc
-    },
-    {} as Record<string, IService[]>
-  )
+  return filteredServices.value.reduce((acc, service) => {
+    // Verifica si la categoría del servicio ya existe, si no, inicializa el array
+    if (!acc[service.category]) {
+      acc[service.category] = []
+    }
+    // Agrega el servicio a la categoría correspondiente
+    acc[service.category].push(service)
+    return acc
+  }, {} as Record<string, IService[]>)
 })
 
 function openNew() {
@@ -148,23 +146,19 @@ async function saveService() {
     'La categoría es obligatorio',
     errorValidation.categoryError
   )
-  validateField(
-    newService.value.price,
-    'El Precio es obligatorio',
-    errorValidation.priceError
-  )
+  validateField(newService.value.price, 'El Precio es obligatorio', errorValidation.priceError)
 
   validateField(
     newService.value.startDate,
     'La fecha de inicio es obligatoria',
     errorValidation.startDateError
-  );
+  )
 
   validateField(
     newService.value.finalDate,
     'La fecha de fin es obligatoria',
     errorValidation.finalDateError
-  );
+  )
 
   // Verifica si hay errores en los campos
   if (Object.values(errorValidation).some((ref) => ref.value)) {
@@ -233,10 +227,12 @@ function editService(item: IService) {
   newService.value = { ...item }
 
   // Encontrar el valor correspondiente en categories para asignarlo a selectedCategory
-  selectedCategory.value = categories.value.find((category:any) => category.display === item.category)
+  selectedCategory.value = categories.value.find(
+    (category: any) => category.display === item.category
+  )
 
   // Encontrar el valor correspondiente en stateOpts para asignarlo a selectedState
-  selectedState.value = stateOpts.value.find((state:any) => state.display === item.state)
+  selectedState.value = stateOpts.value.find((state: any) => state.display === item.state)
 
   registerDialogVisible.value = true // Asegurarse de que solo se abre el diálogo de edición
 }
@@ -290,6 +286,15 @@ async function loadServices() {
   }
 }
 
+const filteredServices = computed(() => {
+  const searchTerm = filters.value.global.value?.toLowerCase() || ''
+  return registeredServices.value.filter(
+    (service) =>
+      service.name.toLowerCase().includes(searchTerm) ||
+      service.description.toLowerCase().includes(searchTerm)
+  )
+})
+
 function viewTasks(serviceId: number) {
   router.push(`/my-services/${serviceId}/tasks`)
 }
@@ -329,10 +334,10 @@ function onFileSelect(event: any) {
       </div>
     </div>
 
-    <div v-for="(categoryServices, category) in groupedServices" :key="category" class="card">
+    <div v-for="(filteredServices, category) in groupedServices" :key="category" class="card">
       <div class="font-semibold text-xl mb-4">Mis servicios en la categoría: {{ category }}</div>
 
-      <DataView :value="categoryServices" :layout="layout">
+      <DataView :value="filteredServices" :layout="layout" :filters="filters">
         <template #list="slotProps">
           <div class="flex flex-col">
             <div v-for="(item, index) in slotProps.items" :key="index">
