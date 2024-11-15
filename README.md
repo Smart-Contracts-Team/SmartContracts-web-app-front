@@ -1,5 +1,9 @@
 # Smart Contracts Web
 
+## Deployed web application link
+Web application deployed:
+[https://smart-contracts-app.netlify.app/](https://smart-contracts-app.netlify.app/)
+
 ## Install dependencies & run the project
 ```bash
 npm install

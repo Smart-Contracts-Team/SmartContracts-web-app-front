@@ -19,6 +19,7 @@ const model = ref([
 const fetchCategories = async () => {
   try {
     const response = await CategoryService.getCategories();
+    // @ts-ignore
     model.value[1].items = response.map(category => ({
       label: category.display,
       icon: 'pi pi-fw pi-list',

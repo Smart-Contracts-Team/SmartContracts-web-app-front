@@ -128,7 +128,7 @@ function redirectTo(path:string) {
             <Divider type="solid" align="center" layout="horizontal">OR</Divider>
             <div class="flex items-center justify-center">
               <label for="sign-up" class="block text-surface-900 dark:text-surface-0 font-medium text-l my-2">Sign
-                Up As</label>
+                up as</label>
             </div>
             <div class="flex items-center justify-between mt-2 mb-8 gap-8">
               <Button type="button" label="Influencer" class="w-full" @click="redirectTo('/auth/influencer-register')"></Button>
