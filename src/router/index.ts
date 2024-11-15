@@ -24,7 +24,7 @@ const router = createRouter({
           props: true
         },
         {
-          path: 'task/service/:serviceId',
+          path: 'tasks/service/:serviceId',
           name: 'TaskView',
           component: TaskView,
           props: true
