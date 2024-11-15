@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref, computed, type Ref, watch } from 'vue'
+import { useRouter } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
 import type { MenuItem } from 'primevue/menuitem'
 import { storageBaseUrl } from '@/config/firebaseConfig'
@@ -7,11 +8,12 @@ import { ServiceService } from '@/services/ServiceService'
 import type { IRegisterServiceRequestDto, IService } from '@/interfaces/Service'
 import { FilterMatchMode } from '@primevue/core/api'
 import { PhotoService } from '@/services/PhotoService'
-import { useRouter } from 'vue-router'
 import { CategoryService } from '@/services/CategoryService'
 import { StateService } from '@/services/StatusService'
 
 const toast = useToast()
+const router = useRouter()
+
 const registerDialogVisible = ref(false)
 const deleteDialogVisible = ref(false)
 const submitted = ref(false)
@@ -23,7 +25,6 @@ const loadingList = ref(false)
 const registeringService = ref(false)
 const unregisteringService = ref(false)
 
-const router = useRouter()
 const selectedFile = ref<File | null>(null)
 const src = ref<string | null>(null) // Para la vista previa de la imagen
 
@@ -296,7 +297,7 @@ const filteredServices = computed(() => {
 })
 
 function viewTasks(serviceId: number) {
-  router.push(`/my-services/${serviceId}/tasks`)
+  router.push(`tasks/service/${serviceId}`)
 }
 
 function onFileSelect(event: any) {

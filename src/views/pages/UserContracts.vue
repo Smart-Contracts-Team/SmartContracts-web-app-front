@@ -399,7 +399,7 @@ const getStatusLabel = (status: string) => {
       :rowsPerPageOptions="[10, 20, 50]"
     >
       <template #header>
-        <div class="flex justify-between">
+        <div class="flex flex-col md:flex-row justify-between gap-4">
           <!-- Botón para agregar nuevos contratos -->
           <Button
             v-if="userType === 'Business'"
@@ -418,15 +418,16 @@ const getStatusLabel = (status: string) => {
               <i class="pi pi-search" />
             </InputIcon>
             <InputText v-model="filters['global'].value" placeholder="Search..." />
-          </IconField>          
+          </IconField>
 
           <!-- Botones de expansión y colapso -->
-          <div class="flex flex-wrap justify-end gap-2">
+          <div class="flex flex-wrap md:justify-start gap-2">
             <Button text icon="pi pi-plus" label="Expand All" @click="expandAll" />
             <Button text icon="pi pi-minus" label="Collapse All" @click="collapseAll" />
           </div>
         </div>
       </template>
+
       <Column expander style="width: 2rem" />
       <Column field="title" header="Title" sortable></Column>
       <Column :header="userType === 'Influencer' ? 'Business' : 'Influencer'" field="name" sortable>

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useLayout } from '@/layout/composables/layout'
 import ThemeSelector from './ThemeSelector.vue'
+import { storageBaseUrl } from '@/config/firebaseConfig'
 import { ref } from 'vue'
 import type { MenuItem } from 'primevue/menuitem';
 import { AuthService } from '@/services/AuthService';
@@ -58,9 +59,9 @@ function goToContracts() {
       </button>
       <div class="logo-wrapper">
         <router-link to="/home" class="layout-topbar-logo">
-          <img class="logo-image" alt="logo"
-            src="https://firebasestorage.googleapis.com/v0/b/verysafe-db940.appspot.com/o/smart-contracts-project%2Fimages%2Flogo%2FIsotipo%20a%20color%20-%20SMART%20CONTRACT.png?alt=media&token=5ef63848-4358-4c8f-9533-e7270d6aa205">
-          <span>Smart Contracts</span>
+          <img class="logo-image w-16 sm:w-28 md:w-36" alt="logo"
+          :src="`${storageBaseUrl}`+ 'logo%2FIsotipo%20a%20color%20-%20SMART%20CONTRACT.png?alt=media&token=5ef63848-4358-4c8f-9533-e7270d6aa205'">
+          <span class="text-sm md:text-lg lg:text-xl whitespace-nowrap">Smart Contracts</span>
         </router-link>
       </div>
     </div>
@@ -128,7 +129,6 @@ function goToContracts() {
 }
 
 .logo-image {
-  width: 6rem;
   height: auto;
 }
 </style>
