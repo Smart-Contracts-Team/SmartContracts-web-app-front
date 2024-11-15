@@ -24,7 +24,7 @@ const router = createRouter({
           props: true
         },
         {
-          path: 'task/service/:serviceId',
+          path: 'tasks/service/:serviceId',
           name: 'TaskView',
           component: TaskView,
           props: true
@@ -81,6 +81,34 @@ const router = createRouter({
       component: () => import('@/views/pages/error/NotFound.vue')
     }
   ]
+})
+
+// Guard de navegación global
+router.beforeEach((to, from, next) => {
+  const publicPages = [
+    '/auth/login',
+    '/auth/influencer-register',
+    '/auth/business-register',
+    '/auth/access'
+  ]
+
+  const authRequired = !publicPages.includes(to.path)
+  const token = localStorage.getItem('token')
+  const typeOfUser = localStorage.getItem('typeOfUser')
+
+  if (token && publicPages.includes(to.path)) {
+    return next('/home')
+  }
+
+  if (authRequired && !token) {
+    return next('/auth/login')
+  }
+
+  if (to.path === '/my-services' && typeOfUser === 'Business') {
+    return next('/home')
+  }
+
+  next()
 })
 
 export default router

@@ -5,7 +5,7 @@ import { AuthService } from '@/services/AuthService'
 import type { IUser } from '@/interfaces/User'
 
 const userData = ref<IUser>({
-  id: '',
+  id: 0,
   user_name: '',
   firstName: '',
   lastName: '',

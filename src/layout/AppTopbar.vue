@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { useLayout } from '@/layout/composables/layout'
 import ThemeSelector from './ThemeSelector.vue'
+import { storageBaseUrl } from '@/config/firebaseConfig'
 import { ref } from 'vue'
 import type { MenuItem } from 'primevue/menuitem';
 import { AuthService } from '@/services/AuthService';
+import router from '@/router';
 
 const { onMenuToggle, toggleDarkMode, isDarkTheme } = useLayout()
 const authService = AuthService
@@ -24,11 +26,6 @@ const overlayMenuItems = ref<MenuItem[]>([
       }]
     : []),
   {
-    label: 'My contracts',
-    icon: 'pi pi-file',
-    url: '/my-contracts'
-  },
-  {
     separator: true
   },
   {
@@ -46,6 +43,12 @@ function toggleMenu(event: MouseEvent) {
     (menu.value as any).toggle(event);
   }
 }
+
+function goToContracts() {
+  router.push({
+    path: '/my-contracts'
+  });
+}
 </script>
 
 <template>
@@ -56,9 +59,9 @@ function toggleMenu(event: MouseEvent) {
       </button>
       <div class="logo-wrapper">
         <router-link to="/home" class="layout-topbar-logo">
-          <img class="logo-image" alt="logo"
-            src="https://firebasestorage.googleapis.com/v0/b/verysafe-db940.appspot.com/o/smart-contracts-project%2Fimages%2Flogo%2FIsotipo%20a%20color%20-%20SMART%20CONTRACT.png?alt=media&token=5ef63848-4358-4c8f-9533-e7270d6aa205">
-          <span>Smart Contracts</span>
+          <img class="logo-image w-16 sm:w-28 md:w-36" alt="logo"
+          :src="`${storageBaseUrl}`+ 'logo%2FIsotipo%20a%20color%20-%20SMART%20CONTRACT.png?alt=media&token=5ef63848-4358-4c8f-9533-e7270d6aa205'">
+          <span class="text-sm md:text-lg lg:text-xl whitespace-nowrap">Smart Contracts</span>
         </router-link>
       </div>
     </div>
@@ -96,9 +99,9 @@ function toggleMenu(event: MouseEvent) {
 
       <div class="layout-topbar-menu hidden lg:block">
         <div class="layout-topbar-menu-content">
-          <button type="button" class="layout-topbar-action">
+          <button v-tooltip.bottom="'Ver contratos'" type="button" class="layout-topbar-action" @click="goToContracts()">
             <i class="pi pi-inbox"></i>
-            <span>Messages</span>
+            <span>Contracts</span>
           </button>
           <Menu ref="menu" :model="overlayMenuItems" :popup="true" />
           <button type="button" class="layout-topbar-action" @click="toggleMenu">
@@ -126,7 +129,6 @@ function toggleMenu(event: MouseEvent) {
 }
 
 .logo-image {
-  width: 6rem;
   height: auto;
 }
 </style>

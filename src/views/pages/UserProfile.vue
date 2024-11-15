@@ -48,7 +48,7 @@ onMounted(async () => {
 <template>
   <!-- Skeleton -->
   <div v-if="!pageReady" class="flex flex-col md:flex-row gap-8">
-    <div class="card flex flex-row gap-8 w-full">
+    <div class="card flex flex-col md:flex-row gap-8 w-full">
       <!-- Imagen en la izquierda -->
       <div class="card flex flex-col items-center">
         <div class="font-semibold text-2xl mb-4">Profile</div>
@@ -112,7 +112,7 @@ onMounted(async () => {
 
   <Fluid v-if="pageReady">
     <div class="flex flex-col md:flex-row gap-8">
-      <div class="card flex flex-row gap-8 w-full">
+      <div class="card flex flex-col md:flex-row gap-8 w-full">
         <!-- Imagen en la izquierda -->
         <div class="card flex flex-col items-center">
           <div class="font-semibold text-2xl mb-4">Profile</div>

@@ -21,7 +21,8 @@ onMounted(async () => {
 
     // Obtener los servicios de la categoría
     const data = await ServiceService.getServicesByCategoryName(props.categoryName);
-    services.value = data.slice(0, 6);
+    services.value = data;
+    console.log(props.categoryName, ": ", data)
     picklistServices.value = [data, []];
     orderlistServices.value = data;
   } catch (error) {
