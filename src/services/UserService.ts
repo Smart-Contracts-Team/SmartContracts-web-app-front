@@ -10,12 +10,12 @@ export const UserService = {
   },
 
   async getUserById(userId: number): Promise<IUser> {
-    const response = await httpClient.get(`${serviceName}/${userId}`)
+    const response = await httpClient.get<IUser>(`${serviceName}/${userId}`)
     return response.data
   },
 
   async getUserByType(type: string): Promise<IUser[]> {
-    const response = await httpClient.get<[]>(`${serviceName}`)
+    const response = await httpClient.get<IUser[]>(`${serviceName}`)
     return response.data.filter((user: IUser) => user.typeOfUser === type)
   },
 

@@ -2,14 +2,15 @@ export const CategoryService = {
   async getCategories() {
     return Promise.resolve([
       { id: 1, name: 'marketing', display: 'Marketing' },
-      { id: 2, name: 'tecnología', display: 'Tecnología' },
-      { id: 3, name: 'producción-audiovisual', display: 'Producción Audiovisual' }
+      { id: 2, name: 'technology', display: 'Tecnología' },
+      { id: 3, name: 'audiovisual-production', display: 'Producción Audiovisual' },
+      { id: 3, name: 'beauty-consulting', display: 'Asesoramiento de Belleza' }
     ])
   },
 
-  async getDisplayByName(name: string): Promise<string | undefined> {
+  async getCategoryName(display: string): Promise<string | undefined> {
     const categories = await this.getCategories()
-    const category = categories.find((category) => category.name === name)
-    return category ? category.display : undefined
+    const category = categories.find((category) => category.display === display)
+    return category ? category.name : undefined
   }
 }

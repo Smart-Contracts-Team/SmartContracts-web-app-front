@@ -50,34 +50,19 @@ onMounted(async () => {
 <template>
   <div class="card">
     <div class="font-semibold text-xl mb-4">Mis Servicios Populares</div>
-    <Carousel
-      :value="services"
-      :numVisible="4"
-      :numScroll="4"
-      :responsiveOptions="carouselResponsiveOptions"
-    >
+    <Carousel :value="services" :numVisible="4" :numScroll="4" :responsiveOptions="carouselResponsiveOptions">
       <template #item="slotProps">
         <div class="border border-surface-200 dark:border-surface-700 rounded m-2 p-4">
           <div class="mb-4">
             <div class="relative mx-auto image-container">
-              <img
-                :src="`${storageBaseUrl}` + slotProps.data.photo"
-                :alt="slotProps.data.name"
-                class="w-full rounded service-image-size"
-              />
-              <div
-                class="dark:bg-surface-900 absolute rounded-border"
-                style="left: 5px; top: 5px"
-              ></div>
+              <img :src="`${storageBaseUrl}` + slotProps.data.photo" :alt="slotProps.data.name"
+                class="w-full rounded service-image-size" />
+              <div class="dark:bg-surface-900 absolute rounded-border" style="left: 5px; top: 5px"></div>
             </div>
           </div>
           <div class="mb-4 font-medium">{{ slotProps.data.description }}</div>
           <div class="flex justify-between items-center">
-            <div class="mt-0 font-semibold text-xl">${{ slotProps.data.price }}</div>
-            <span>
-              <Button icon="pi pi-heart" severity="secondary" outlined />
-              <Button icon="pi pi-shopping-cart" class="ml-2" />
-            </span>
+            <div class="ml-auto mt-0 font-semibold text-xl">${{ slotProps.data.price }}</div>
           </div>
         </div>
       </template>
@@ -87,25 +72,14 @@ onMounted(async () => {
   <!-- Popular -->
   <div class="card">
     <div class="font-semibold text-xl mb-4">Empresas Populares</div>
-    <Carousel
-      :value="business"
-      :numVisible="4"
-      :numScroll="4"
-      :responsiveOptions="carouselResponsiveOptions"
-    >
+    <Carousel :value="business" :numVisible="4" :numScroll="4" :responsiveOptions="carouselResponsiveOptions">
       <template #item="slotProps">
         <div class="border border-surface-200 dark:border-surface-700 rounded m-2 p-4">
           <div class="mb-3">
             <div class="relative mx-auto image-container">
-              <img
-                :src="`${storageBaseUrl}` + slotProps.data.photo"
-                :alt="slotProps.data.firstName"
-                class="w-full rounded business-image-size"
-              />
-              <div
-                class="dark:bg-surface-900 absolute rounded-border"
-                style="left: 5px; top: 5px"
-              ></div>
+              <img :src="`${storageBaseUrl}` + slotProps.data.photo" :alt="slotProps.data.firstName"
+                class="w-full rounded business-image-size" />
+              <div class="dark:bg-surface-900 absolute rounded-border" style="left: 5px; top: 5px"></div>
             </div>
           </div>
           <div class="mb-4 font-semibold text-xl">{{ slotProps.data.firstName }}</div>

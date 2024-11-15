@@ -3,6 +3,7 @@ import { onMounted, ref } from 'vue';
 import { storageBaseUrl } from '@/config/firebaseConfig';
 import { ServiceService } from '@/services/ServiceService';
 import type { IService } from '@/interfaces/Service';
+import { CategoryService } from '@/services/CategoryService';
 
 const services = ref<IService[]>([]);
 const props = defineProps<{ categoryName: string }>();
@@ -10,22 +11,30 @@ const picklistServices = ref<IService[][]>([[], []]);
 const orderlistServices = ref<IService[]>([]);
 const options = ref(['grid', 'list']);
 const layout = ref('grid');
+const categoryDisplayName = ref('');
 
-onMounted(() => {
-  ServiceService.getServicesByCategoryName(props.categoryName).then((data) => {
-    services.value = data.slice(0, 6);
+onMounted(async () => {
+  try {
+    // Buscar el nombre de la categoría en display
+    categoryDisplayName.value = 
+      (await CategoryService.getCategories()).find(category => category.name === props.categoryName)?.display || props.categoryName;
+
+    // Obtener los servicios de la categoría
+    const data = await ServiceService.getServicesByCategoryName(props.categoryName);
+    services.value = data;
+    console.log(props.categoryName, ": ", data)
     picklistServices.value = [data, []];
     orderlistServices.value = data;
-  }).catch((error) => {
-    console.error('Error fetching services:', error);
-  });
+  } catch (error) {
+    console.error('Error fetching services or category display name:', error);
+  }
 });
 </script>
 
 <template>
   <div class="flex flex-col">
     <div class="card">
-      <div class="font-semibold text-xl">Servicios en la categoría: {{ props.categoryName }}</div>
+      <div class="font-semibold text-xl">Servicios en la categoría: {{ categoryDisplayName  }}</div>
       <DataView :value="services" :layout="layout">
         <template #header>
           <div class="flex justify-end">
@@ -68,8 +77,7 @@ onMounted(() => {
                   <div class="flex flex-col md:items-end gap-8">
                     <span class="text-xl font-semibold">${{ item.price }}</span>
                     <div class="flex flex-row-reverse md:flex-row gap-2">
-                      <Button icon="pi pi-heart" outlined></Button>
-                      <Button icon="pi pi-shopping-cart" label="Buy Now" :disabled="item.inventoryStatus === 'OUTOFSTOCK'" class="flex-auto md:flex-initial whitespace-nowrap"></Button>
+                      <Button icon="pi pi-plus" label="View more" class="flex-auto md:flex-initial whitespace-nowrap"></Button>
                     </div>
                   </div>
                 </div>
@@ -111,8 +119,7 @@ onMounted(() => {
                   <div class="flex flex-col gap-6 mt-6">
                     <span class="text-2xl font-semibold">${{ item.price }}</span>
                     <div class="flex gap-2">
-                      <Button icon="pi pi-shopping-cart" label="Buy Now" :disabled="item.inventoryStatus === 'OUTOFSTOCK'" class="flex-auto whitespace-nowrap"></Button>
-                      <Button icon="pi pi-heart" outlined></Button>
+                      <Button icon="pi pi-plus" label="View more" class="flex-auto whitespace-nowrap"></Button>
                     </div>
                   </div>
                 </div>
