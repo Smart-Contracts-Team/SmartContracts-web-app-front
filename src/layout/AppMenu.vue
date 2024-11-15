@@ -32,7 +32,10 @@ const fetchCategories = async () => {
   }
 };
 
+
+
 onMounted(fetchCategories)
+
 </script>
 
 <template>

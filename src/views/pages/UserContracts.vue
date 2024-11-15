@@ -8,6 +8,7 @@ import { UserService } from '@/services/UserService'
 import { storageBaseUrl } from '@/config/firebaseConfig'
 import { CategoryService } from '@/services/CategoryService'
 import { ServiceService } from '@/services/ServiceService'
+import { EthereumService } from '@/services/EthereumService'
 
 const filters = ref({
   global: { value: null, matchMode: FilterMatchMode.CONTAINS }
@@ -376,6 +377,24 @@ const getStatusLabel = (status: string) => {
       return { severity: 'secondary', label: 'Undefined' }
   }
 }
+
+const expandedSmartContract = ref<{ contractId: string; influencerId: string; businessId: string ; hash:string} | null>(null);
+const showContractDialog = ref(false);
+
+// Función para abrir el modal después de obtener los datos
+const fetchSmartContract = async (hash: string, smartcontractId: string) => {
+  try {
+    console.log(smartcontractId);
+    showContractDialog.value = true; // Abre el modal
+    const response = await EthereumService.getSmartContractData('2');
+    if (response) {
+      expandedSmartContract.value = { ...response, hash }; // Agrega el hash al objeto
+    }
+    console.log(expandedSmartContract);
+  } catch (error) {
+    console.error('Error fetching SmartContract data:', error);
+  }
+};
 </script>
 
 <template>
@@ -470,6 +489,16 @@ const getStatusLabel = (status: string) => {
           />
         </template>
       </Column>
+      <Column field="smartcontract" header="SmartContract">
+      <template #body="slotProps">
+        <Button
+          label="View Contract"
+          class="p-button-primary"
+          @click="fetchSmartContract(slotProps.data.hash,slotProps.data.id)"
+        />
+      </template>
+      </Column>
+      <!--EXPANSION DESIGN-->
       <template #expansion="slotProps">
         <div class="p-4">
           <h5 class="font-bold text-l mb-2">Contract description:</h5>
@@ -493,6 +522,43 @@ const getStatusLabel = (status: string) => {
       </template>
     </DataTable>
   </div>
+
+  <!-- Dialogo para abrir contractos-->
+
+  <Dialog
+    v-model:visible="showContractDialog"
+    :style="{ width: '500px' }"
+    header="📄 Contract Details"
+    modal
+    :draggable="false"
+    class="p-fluid"
+  >
+    <div v-if="expandedSmartContract" class="flex flex-col gap-4">
+      <div>
+        <label class="block font-bold mb-2">Contract ID:</label>
+        <span class="text-gray-700">{{ expandedSmartContract.contractId }}</span>
+      </div>
+      <div>
+        <label class="block font-bold mb-2">Influencer ID:</label>
+        <span class="text-gray-700">{{ expandedSmartContract.influencerId }}</span>
+      </div>
+      <div>
+        <label class="block font-bold mb-2">Business ID:</label>
+        <span class="text-gray-700">{{ expandedSmartContract.businessId }}</span>
+      </div>
+      <div>
+        <label class="block font-bold mb-2">Hash Contract:</label>
+        <span class="text-gray-700">{{ expandedSmartContract.hash }}</span>
+      </div>
+    </div>
+    <div v-else>
+      <p>No contract data available.</p>
+    </div>
+
+    <template #footer>
+      <Button label="Cancel" icon="pi pi-times" text @click="hideDialog" />
+    </template>
+  </Dialog>
 
   <!-- Diálogo para crear/editar contrato -->
   <Dialog
