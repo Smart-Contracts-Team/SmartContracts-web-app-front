@@ -9,6 +9,7 @@ export interface IContract {
   price: number
   status: string
   type: string
+  hash:string
   businessId: number
   influencerId: number
   services: IService[]
@@ -32,4 +33,15 @@ export interface IRegisterContractRequestDto {
   businessId: number
   influencerId: number
   services: IService[]
+}
+
+export interface IContractDto{
+  businessId: Number
+  influencerId: Number
+}
+
+export interface ISmartContractInfo{
+  transactionHash: string
+  status:string
+  gasUsed:number
 }
