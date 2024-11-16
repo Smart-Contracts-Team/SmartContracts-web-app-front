@@ -23,8 +23,8 @@ const router = createRouter({
         },
         {
           path: 'tasks/service/:serviceId',
-          name: 'TaskView',
-          component: () => import('@/views/components/TaskView.vue'),
+          name: 'ServiceView',
+          component: () => import('@/views/components/ServiceView.vue'),
           props: true
         },
 

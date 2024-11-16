@@ -60,13 +60,14 @@ watch(selectedInfluencer, async (newVal: any) => {
     // Aquí obtenemos los servicios del influencer seleccionado
     try {
       const services = await ServiceService.getServicesByUserId(newVal.id)
-      servicesList.value = services.map((service) => ({
-        id: service.id,
-        name: service.name,
-        status: service.state,
-        price: service.price
-      }))
-      //.filter((service) => service.status == 'active')
+      servicesList.value = services
+        .filter((service) => service.state === 'active')
+        .map((service) => ({
+          id: service.id,
+          name: service.name,
+          status: service.state,
+          price: service.price
+        }))
     } catch (error) {
       console.error('Error fetching services:', error)
       toast.add({

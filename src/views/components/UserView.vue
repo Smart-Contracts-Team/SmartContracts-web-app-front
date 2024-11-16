@@ -1,17 +1,22 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, watch, computed } from 'vue'
 import { storageBaseUrl } from '@/config/firebaseConfig'
 import { UserService } from '@/services/UserService'
 import { ServiceService } from '@/services/ServiceService'
 import { CategoryService } from '@/services/CategoryService'
 import { ReviewService } from '@/services/ReviewService'
 import type { IUser } from '@/interfaces/User'
+import type { IService } from '@/interfaces/Service'
+import type { IReview } from '@/interfaces/Review'
 
 const user = ref<IUser | null>(null)
 const services = ref<IService[]>([])
 const reviews = ref<IReview[]>([])
-const userId = Number(localStorage.getItem('userId'))
 const pageReady = ref(false)
+const userLoading = ref(true)
+const servicesLoading = ref(true)
+const reviewsLoading = ref(true)
+const props = defineProps<{ userId: number }>()
 
 const carouselResponsiveOptions = ref([
   {
@@ -31,13 +36,33 @@ const carouselResponsiveOptions = ref([
   }
 ])
 
+watch(
+  () => props.userId,
+  async (newUserId) => {
+    pageReady.value = false
+    // Reset services and reviews while waiting for the new user data
+    services.value = []
+    reviews.value = []
+
+    try {
+      await getUser(newUserId)
+      await loadServices(newUserId)
+      await loadReviews(newUserId)
+    } catch (error) {
+      console.error('Error al actualizar datos para el nuevo usuario:', error)
+    } finally {
+      pageReady.value = true
+    }
+  }
+)
+
 onMounted(async () => {
-  await getUser()
-  await loadServices()
-  await loadReviews()
+  await getUser(props.userId)
+  await loadServices(props.userId)
+  await loadReviews(props.userId)
 })
 
-async function getUser() {
+async function getUser(userId: number) {
   try {
     const response = await UserService.getUserById(userId)
     user.value = response
@@ -47,10 +72,12 @@ async function getUser() {
       error.response ? 'Error al obtener al usuario:' : 'Token no encontrado en localStorage',
       error
     )
+  } finally {
+    userLoading.value = false
   }
 }
 
-async function loadServices() {
+async function loadServices(userId: number) {
   try {
     const [servicesResponse, categories] = await Promise.all([
       ServiceService.getServicesByUserId(userId),
@@ -69,10 +96,12 @@ async function loadServices() {
       error.response ? 'Error al obtener los servicios:' : 'Token no encontrado en localStorage',
       error
     )
+  } finally {
+    servicesLoading.value = false
   }
 }
 
-async function loadReviews() {
+async function loadReviews(userId: number) {
   try {
     const reviewsResponse = await ReviewService.getReviewsByUserId(userId)
     const reviewsWithAuthorInfo = await Promise.all(
@@ -91,8 +120,14 @@ async function loadReviews() {
       error.response ? 'Error al obtener las reseñas:' : 'Token no encontrado en localStorage',
       error
     )
+  } finally {
+    reviewsLoading.value = false
   }
 }
+
+const isInfluencer = computed(() => {
+  return user.value && user.value.typeOfUser === 'Influencer'
+})
 </script>
 
 <template>
@@ -100,7 +135,7 @@ async function loadReviews() {
     <!-- Información del usuario -->
     <div class="card grid grid-cols-1 md:grid-cols-2 gap-8 items-center h-full">
       <div class="flex flex-col items-center justify-center">
-        <div class="font-bold text-2xl mb-4">@{{ user.user_name }}</div>
+        <div class="font-bold text-2xl mb-4">@{{ user?.user_name }}</div>
         <Image
           v-if="user"
           :src="`${storageBaseUrl}${user.photo}`"
@@ -110,18 +145,20 @@ async function loadReviews() {
       </div>
 
       <div class="flex flex-col gap-4">
-        <div class="flex flex-wrap gap-2 w-full">
+        <div v-if="isInfluencer" class="flex flex-wrap gap-2 w-full">
           <label for="firstname" class="font-bold">Firstname:</label>
           <p v-if="user" id="firstname" type="text">{{ user.firstName }}</p>
         </div>
 
-        <div class="flex flex-wrap gap-2 w-full">
+        <div v-if="isInfluencer" class="flex flex-wrap gap-2 w-full">
           <label for="lastname" class="font-bold">Lastname:</label>
           <p v-if="user" id="lastname" type="text">{{ user.lastName }}</p>
         </div>
 
         <div class="flex flex-wrap gap-2 w-full">
-          <label for="username" class="font-bold">Username:</label>
+          <label for="username" class="font-bold"
+            >{{ !isInfluencer ? 'Business Name' : 'Username' }}:</label
+          >
           <p v-if="user" id="username" type="text">{{ user.user_name }}</p>
         </div>
 
@@ -135,12 +172,12 @@ async function loadReviews() {
           <p v-if="user" id="ruc" type="text">{{ user.ruc }}</p>
         </div>
 
-        <div class="flex flex-wrap gap-2 w-full">
+        <div v-if="isInfluencer" class="flex flex-wrap gap-2 w-full">
           <label for="phone" class="font-bold">Phone:</label>
           <p v-if="user" id="phone" type="text">{{ user.phone }}</p>
         </div>
 
-        <div class="flex flex-wrap gap-2 w-full">
+        <div v-if="isInfluencer" class="flex flex-wrap gap-2 w-full">
           <label for="birthdate" class="font-bold">Birthdate:</label>
           <p v-if="user" id="birthdate" type="text">{{ user.birthDate }}</p>
         </div>
@@ -153,7 +190,7 @@ async function loadReviews() {
     </div>
 
     <!-- Services -->
-    <div class="flex flex-col gap-8 w-full">
+    <div v-if="isInfluencer" class="flex flex-col gap-8 w-full">
       <div class="card w-full">
         <div class="font-bold text-2xl mb-4">Services</div>
         <Carousel
@@ -163,7 +200,10 @@ async function loadReviews() {
           :responsiveOptions="carouselResponsiveOptions"
         >
           <template #item="slotProps">
-            <div class="border border-surface-200 dark:border-surface-700 rounded m-2 p-4 flex flex-col h-full">
+            <div
+              v-if="!servicesLoading"
+              class="border border-surface-200 dark:border-surface-700 rounded m-2 p-4 flex flex-col h-full"
+            >
               <div class="mb-4 flex-grow">
                 <div class="relative mx-auto image-container">
                   <img
@@ -182,7 +222,12 @@ async function loadReviews() {
               <div class="flex justify-between items-center mt-auto">
                 <div class="mt-0 font-semibold text-xl">${{ slotProps.data.price }}</div>
                 <span>
-                    <Button icon="pi pi-plus" label="View more" class="ml-2"/>
+                  <Button
+                    icon="pi pi-plus"
+                    label="View more"
+                    class="ml-2"
+                    @click="$router.push(`/tasks/service/${slotProps.data.id}`)"
+                  />
                 </span>
               </div>
             </div>
@@ -195,17 +240,28 @@ async function loadReviews() {
     <div class="flex flex-col gap-8 w-full mt-8">
       <div class="card w-full">
         <div class="font-bold text-2xl mb-4">Reviews</div>
-        <div v-if="reviews.length > 0">
+        <div v-if="reviews.length > 0 && !reviewsLoading">
           <Panel v-for="reviews in reviews" :key="reviews.id" class="mb-4">
             <template #header>
               <div class="flex items-center pl-2">
-                <Avatar :image="`${storageBaseUrl}${reviews.authorPhoto}`" shape="circle" />
-                <span class="font-bold p-2">{{ reviews.authorName }}</span>
+                <Avatar
+                  :image="`${storageBaseUrl}${reviews.authorPhoto}`"
+                  shape="circle"
+                  class="cursor-pointer"
+                  @click="$router.push(`/user-information/` + reviews.authorId)"
+                />
+                <span
+                  class="font-bold p-2 cursor-pointer"
+                  @click="$router.push(`/user-information/` + reviews.authorId)"
+                  >{{ reviews.authorName }}</span
+                >
               </div>
             </template>
             <template #footer>
               <div class="flex flex-wrap items-center justify-end gap-4">
-                <span class="text-surface-500 dark:text-surface-400">{{ reviews.dateCreated }}</span>
+                <span class="text-surface-500 dark:text-surface-400">{{
+                  reviews.dateCreated
+                }}</span>
               </div>
             </template>
             <p class="m-0 mb-2 text-surface-500 dark:text-surface-400">{{ reviews.serviceName }}</p>

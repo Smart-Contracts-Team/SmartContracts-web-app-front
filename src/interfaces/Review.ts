@@ -8,6 +8,8 @@ export interface IReview {
   authorId: number
   influencerId: number
   serviceId: number
+  authorPhoto?: string
+  authorName?: string
 }
 
 export interface IRegisteredReview {
