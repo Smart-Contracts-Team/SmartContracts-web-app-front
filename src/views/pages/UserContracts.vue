@@ -3,7 +3,7 @@ import { FilterMatchMode } from '@primevue/core/api'
 import { useToast } from 'primevue/usetoast'
 import { computed, onMounted, ref, watch, type Ref } from 'vue'
 import { ContractService } from '@/services/ContractService'
-import type { IContract, IRegisterContractRequestDto } from '@/interfaces/Contract'
+import type { IContract, IContractDto, IRegisterContractRequestDto } from '@/interfaces/Contract'
 import { UserService } from '@/services/UserService'
 import { storageBaseUrl } from '@/config/firebaseConfig'
 import { CategoryService } from '@/services/CategoryService'
@@ -195,7 +195,12 @@ async function saveContract() {
   newContract.value.influencerId = influencerId.value || 0
   newContract.value.businessId = userId
   newContract.value.status = 'pending'
-  // Creación de un nuevo contrato
+
+  const contractDto = ref<IContractDto>({} as IContractDto)
+    // Creación de un nuevo contrato
+  contractDto.value.businessId = newContract.value.businessId;
+  contractDto.value.influencerId = newContract.value.influencerId;
+
   console.log('datos pa guardar: ', newContract.value)
   try {
     registeringContract.value = true
@@ -211,7 +216,15 @@ async function saveContract() {
         life: 3000
       })
     } else {
-      await ContractService.createContract(newContract.value)
+
+      const contractCreated = await ContractService.createContract(newContract.value)
+      const smartcontractResponse =  await EthereumService.postSmartContract(contractDto.value);
+      
+      contractCreated.hash = smartcontractResponse.transactionHash
+
+      await ContractService.updateContract(contractCreated.id, contractCreated)
+
+
       toast.add({
         severity: 'success',
         summary: 'Success',
@@ -386,7 +399,7 @@ const fetchSmartContract = async (hash: string, smartcontractId: string) => {
   try {
     console.log(smartcontractId);
     showContractDialog.value = true; // Abre el modal
-    const response = await EthereumService.getSmartContractData('2');
+    const response = await EthereumService.getSmartContractData(smartcontractId);
     if (response) {
       expandedSmartContract.value = { ...response, hash }; // Agrega el hash al objeto
     }

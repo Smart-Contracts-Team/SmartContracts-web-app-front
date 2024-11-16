@@ -41,7 +41,7 @@ export interface IContractDto{
 }
 
 export interface ISmartContractInfo{
-  transactionHash: String
+  transactionHash: string
   status:string
   gasUsed:number
 }

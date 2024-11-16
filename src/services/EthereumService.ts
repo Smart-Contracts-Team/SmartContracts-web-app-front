@@ -36,6 +36,19 @@ export const EthereumService ={
         }
     },
 
+    async postSmartContract(smartContract: IContractDto):Promise<ISmartContractInfo>{
+        try{
+            const response = await httpClient.post<ISmartContractInfo>(
+                `${ethereumServiceName}/smartcontract`,smartContract);
+
+            return response.data;
+        }
+        catch(error){
+            console.error('Error creating smart contract', error);
+            throw new Error('Failed to create Smart Contract');
+        }
+    },
+
     // Método para convertir el balance de WEI a ETH
     convertWeiToEth(wei: string): string {
         const weiToEth = 1e18; // 1 ETH = 10^18 WEI
