@@ -2,23 +2,33 @@
 import { onMounted, ref } from 'vue'
 import { storageBaseUrl } from '@/config/firebaseConfig'
 import { ServiceService } from '@/services/ServiceService'
+import { UserService } from '@/services/UserService'
 import type { IService } from '@/interfaces/Service'
 import { TaskService } from '@/services/TaskService'
 import type { ITask } from '@/interfaces/Task'
 
 const tasks = ref<ITask[]>([])
 const service = ref<IService | null>(null)
+const user = ref<IUser | null>(null)
 const props = defineProps<{ serviceId: number }>()
 
 onMounted(async () => {
   try {
-    // Obtener los tasks por serviceId
+    // Obtener el servicio por serviceId
     const servicedata = await ServiceService.getServiceById(props.serviceId)
     service.value = servicedata
+
+    // Obtener la información del usuario asociado al servicio
+    if (servicedata?.userId) {
+      const userdata = await UserService.getUserById(servicedata.userId)
+      user.value = userdata
+    }
+
+    // Obtener las tareas asociadas al servicio
     const tasksdata = await TaskService.getTasksByServiceId(props.serviceId)
     tasks.value = tasksdata
   } catch (error) {
-    console.error('Error al obtener las tareas:', error)
+    console.error('Error al obtener los datos:', error)
   }
 })
 
@@ -52,8 +62,8 @@ const getSeverity = (status: string) => {
 
 <template>
   <Fluid>
-    <!-- Información del Servicio -->
     <div class="flex flex-col md:flex-row gap-8">
+      <!-- Información del Servicio -->
       <div class="card flex flex-col md:flex-row gap-8 w-full">
         <div class="flex flex-col gap-4 w-full">
           <div class="flex flex-wrap gap-2 w-full">
@@ -76,6 +86,23 @@ const getSeverity = (status: string) => {
 
         <div class="flex flex-col gap-4 w-full">
           <div class="flex flex-wrap gap-2 w-full mb-8"></div>
+
+          <div class="flex items-center gap-2">
+            <Avatar
+              :image="`${storageBaseUrl}` + user?.photo"
+              shape="circle"
+              class="cursor-pointer"
+              @click="$router.push(`/user-information/` + service.userId)"
+            />
+            <span
+              v-if="user"
+              id="influencer"
+              class="cursor-pointer"
+              type="text"
+              @click="$router.push(`/user-information/` + service.userId)"
+              >{{ user.firstName }} {{ user.lastName }}</span
+            >
+          </div>
 
           <div class="flex flex-wrap gap-2 w-full">
             <label for="description" class="font-bold">Description:</label>
@@ -120,7 +147,8 @@ const getSeverity = (status: string) => {
     </div>
 
     <div class="flex flex-col gap-8 w-full">
-      <div class="card w-full">
+      <!-- Lista de tareas -->
+      <div class="card w-full mt-8">
         <DataTable :value="tasks" tableStyle="min-width: 50rem" stripedRows>
           <template #header>
             <div class="flex flex-wrap items-center justify-between gap-2">
