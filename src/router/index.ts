@@ -1,7 +1,5 @@
 import AppLayout from '@/layout/AppLayout.vue'
 import { createRouter, createWebHistory } from 'vue-router'
-import CategoryView from '@/views/components/CategoryView.vue'
-import TaskView from '@/views/components/TaskView.vue'
 
 const router = createRouter({
   // history: createWebHistory(import.meta.env.BASE_URL),
@@ -20,13 +18,13 @@ const router = createRouter({
         {
           path: '/category/:categoryName',
           name: 'CategoryView',
-          component: CategoryView,
+          component: () => import('@/views/components/CategoryView.vue'),
           props: true
         },
         {
           path: 'tasks/service/:serviceId',
-          name: 'TaskView',
-          component: TaskView,
+          name: 'ServiceView',
+          component: () => import('@/views/components/ServiceView.vue'),
           props: true
         },
 
@@ -45,6 +43,12 @@ const router = createRouter({
           path: 'my-contracts',
           name: 'user-contracts',
           component: () => import('@/views/pages/UserContracts.vue')
+        },
+        {
+          path: '/user-information/:userId',
+          name: 'user-information',
+          component: () => import('@/views/components/UserView.vue'),
+          props: true
         }
       ]
     },
@@ -81,6 +85,34 @@ const router = createRouter({
       component: () => import('@/views/pages/error/NotFound.vue')
     }
   ]
+})
+
+// Guard de navegación global
+router.beforeEach((to, from, next) => {
+  const publicPages = [
+    '/auth/login',
+    '/auth/influencer-register',
+    '/auth/business-register',
+    '/auth/access'
+  ]
+
+  const authRequired = !publicPages.includes(to.path)
+  const token = localStorage.getItem('token')
+  const typeOfUser = localStorage.getItem('typeOfUser')
+
+  if (token && publicPages.includes(to.path)) {
+    return next('/home')
+  }
+
+  if (authRequired && !token) {
+    return next('/auth/login')
+  }
+
+  if (to.path === '/my-services' && typeOfUser === 'Business') {
+    return next('/home')
+  }
+
+  next()
 })
 
 export default router
