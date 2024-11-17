@@ -176,7 +176,7 @@ function onFileSelect(event: any) {
             <Image
               v-if="user"
               :src="`${storageBaseUrl}` + user.photo"
-              alt="Image"
+              :alt="user.user_name"
               width="250"
               height="250"
               class="object-cover"

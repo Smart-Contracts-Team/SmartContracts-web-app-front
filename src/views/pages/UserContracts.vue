@@ -23,6 +23,7 @@ const registerDialogVisible = ref(false)
 const registeringContract = ref(false)
 
 const confirmDialogVisible = ref(false)
+const cancelDialogVisible = ref(false)
 const selectedContract = ref<IContract | null>(null)
 const checked = ref(false)
 
@@ -198,9 +199,9 @@ async function saveContract() {
   newContract.value.status = 'pending'
 
   const contractDto = ref<IContractDto>({} as IContractDto)
-    // Creación de un nuevo contrato
-  contractDto.value.businessId = newContract.value.businessId;
-  contractDto.value.influencerId = newContract.value.influencerId;
+  // Creación de un nuevo contrato
+  contractDto.value.businessId = newContract.value.businessId
+  contractDto.value.influencerId = newContract.value.influencerId
 
   console.log('datos pa guardar: ', newContract.value)
   try {
@@ -217,14 +218,12 @@ async function saveContract() {
         life: 3000
       })
     } else {
-
       const contractCreated = await ContractService.createContract(newContract.value)
-      const smartcontractResponse =  await EthereumService.postSmartContract(contractDto.value);
-      
+      const smartcontractResponse = await EthereumService.postSmartContract(contractDto.value)
+
       contractCreated.hash = smartcontractResponse.transactionHash
 
       await ContractService.updateContract(contractCreated.id, contractCreated)
-
 
       toast.add({
         severity: 'success',
@@ -248,12 +247,6 @@ async function saveContract() {
   } finally {
     registeringContract.value = false
   }
-}
-
-function editContract(item: IContract) {
-  // Copiar el contrato seleccionado y abrir el diálogo de edición
-  newContract.value = { ...item }
-  registerDialogVisible.value = true // Asegurarse de que solo se abre el diálogo de edición
 }
 
 async function loadContracts() {
@@ -318,24 +311,22 @@ const filteredContracts = computed(() => {
     : registeredContracts.value
 })
 
-function editStatus(contract: IContract) {
-  if (contract.status === 'pending') {
-    selectedContract.value = contract
-    confirmDialogVisible.value = true
-  } else {
-    toast.add({
-      severity: 'warn',
-      summary: 'Cannot Edit Status',
-      detail: 'Only pending contracts can be updated.',
-      life: 3000
-    })
-  }
+// Función para abrir el diálogo de aceptación
+function openAcceptDialog(contract: IContract) {
+  selectedContract.value = contract
+  confirmDialogVisible.value = true // Abre el diálogo de confirmación para aceptar
 }
 
-function confirmStatusChange() {
+// Función para abrir el diálogo de cancelación
+function openCancelDialog(contract: IContract) {
+  selectedContract.value = contract
+  cancelDialogVisible.value = true // Abre el diálogo de confirmación para cancelar
+}
+
+// Confirmar el cambio de estado a "active"
+function confirmAcceptContract() {
   if (selectedContract.value) {
-    updatingStatus.value = true
-    selectedContract.value.status = 'active' // Cambiar el estado del contrato
+    selectedContract.value.status = 'active' // Cambiar el estado a "active"
     ContractService.updateContract(selectedContract.value.id, selectedContract.value)
       .then(() => {
         toast.add({
@@ -354,14 +345,42 @@ function confirmStatusChange() {
         })
       })
       .finally(() => {
-        confirmDialogVisible.value = false
-        updatingStatus.value = false
+        confirmDialogVisible.value = false // Cierra el diálogo
       })
   }
 }
 
+// Confirmar la cancelación del contrato
+function confirmRejectContract() {
+  if (selectedContract.value) {
+    selectedContract.value.status = 'cancel' // Cambiar el estado a "cancel"
+    ContractService.updateContract(selectedContract.value.id, selectedContract.value)
+      .then(() => {
+        toast.add({
+          severity: 'success',
+          summary: 'Contract Cancelled',
+          detail: `Contract status updated to cancel`,
+          life: 3000
+        })
+      })
+      .catch((error) => {
+        toast.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: `Error cancelling contract: ${(error as Error).message}`,
+          life: 3000
+        })
+      })
+      .finally(() => {
+        cancelDialogVisible.value = false // Cierra el diálogo de cancelación
+      })
+  }
+}
+
+// Función para cerrar los diálogos
 function cancelStatusChange() {
   confirmDialogVisible.value = false
+  cancelDialogVisible.value = false
 }
 
 function expandAll() {
@@ -392,23 +411,28 @@ const getStatusLabel = (status: string) => {
   }
 }
 
-const expandedSmartContract = ref<{ contractId: string; influencerId: string; businessId: string ; hash:string} | null>(null);
-const showContractDialog = ref(false);
+const expandedSmartContract = ref<{
+  contractId: string
+  influencerId: string
+  businessId: string
+  hash: string
+} | null>(null)
+const showContractDialog = ref(false)
 
 // Función para abrir el modal después de obtener los datos
 const fetchSmartContract = async (hash: string, smartcontractId: string) => {
   try {
-    console.log(smartcontractId);
-    showContractDialog.value = true; // Abre el modal
-    const response = await EthereumService.getSmartContractData(smartcontractId);
+    console.log(smartcontractId)
+    showContractDialog.value = true // Abre el modal
+    const response = await EthereumService.getSmartContractData(smartcontractId)
     if (response) {
-      expandedSmartContract.value = { ...response, hash }; // Agrega el hash al objeto
+      expandedSmartContract.value = { ...response, hash } // Agrega el hash al objeto
     }
-    console.log(expandedSmartContract);
+    console.log(expandedSmartContract)
   } catch (error) {
-    console.error('Error fetching SmartContract data:', error);
+    console.error('Error fetching SmartContract data:', error)
   }
-};
+}
 </script>
 
 <template>
@@ -466,14 +490,17 @@ const fetchSmartContract = async (hash: string, smartcontractId: string) => {
       <Column :header="userType === 'Influencer' ? 'Business' : 'Influencer'" field="name" sortable>
         <template #body="{ data }">
           <div class="flex items-center gap-2">
-            <img
-              v-if="photoLoaded"
-              :alt="data.name"
-              :src="`${storageBaseUrl}` + data.photo"
-              style="width: 32px; height: 32px"
-            />
+            <div class="flex justify-center items-center rounded-full overflow-hidden">
+              <Image
+                v-if="photoLoaded"
+                :alt="data.name"
+                :src="`${storageBaseUrl}` + data.photo"
+                style="width: 32px; height: 32px"
+                class="object-cover"
+              />
+              <Skeleton v-else shape="circle" size="32" />
+            </div>
             <!-- Si la imagen aún no ha cargado, mostramos el skeleton -->
-            <Skeleton v-else shape="circle" size="32" />
             <span>{{ data.name }}</span>
           </div>
         </template>
@@ -495,22 +522,38 @@ const fetchSmartContract = async (hash: string, smartcontractId: string) => {
       ></Column>
       <Column v-if="userType == 'Influencer'" header="Actions">
         <template #body="{ data }">
-          <Button
-            v-if="data.status == 'pending'"
-            label="Accept"
-            class="p-button-primary"
-            @click="editStatus(data)"
-          />
+          <div class="flex space-x-2">            
+            <Button
+              icon="pi pi-file"
+              severity="info"
+              rounded
+              variant="outlined"
+              aria-label="User"
+              v-tooltip.bottom="'Contract information'"
+              @click="fetchSmartContract(data.hash, data.id)"
+            />
+            <Button
+              v-if="data.status == 'pending'"
+              icon="pi pi-check"
+              rounded
+              variant="outlined"
+              aria-label="Accept"
+              severity="success"
+              v-tooltip.bottom="'Accept contract'"
+              @click="openAcceptDialog(data)"
+            />
+            <Button
+              v-if="data.status == 'pending'"
+              icon="pi pi-times"
+              rounded
+              variant="outlined"
+              aria-label="Reject"
+              severity="danger"
+              v-tooltip.bottom="'Reject contract'"
+              @click="openCancelDialog(data)"
+            />
+          </div>
         </template>
-      </Column>
-      <Column field="smartcontract" header="SmartContract">
-      <template #body="slotProps">
-        <Button
-          label="View Contract"
-          class="p-button-primary"
-          @click="fetchSmartContract(slotProps.data.hash,slotProps.data.id)"
-        />
-      </template>
       </Column>
       <!--EXPANSION DESIGN-->
       <template #expansion="slotProps">
@@ -701,7 +744,7 @@ const fetchSmartContract = async (hash: string, smartcontractId: string) => {
     </template>
   </Dialog>
 
-  <!-- Confirm Dialog -->
+  <!-- Confirm dialog to Accept Contract -->
   <Dialog
     v-model:visible="confirmDialogVisible"
     header="Confirm Acceptance of Contract"
@@ -738,7 +781,7 @@ const fetchSmartContract = async (hash: string, smartcontractId: string) => {
     </p>
 
     <p class="mb-2 font-bold text-xl">Condiciones Adicionales</p>
-    <p class="mb-8">
+    <p class="mb-4">
       Además, le recordamos que la naturaleza de los contratos SmartContracts implica una ejecución
       automática de los términos una vez que ambas partes han dado su consentimiento. De esta
       manera, SmartContracts actúa como un facilitador para que el acuerdo sea validado de forma
@@ -775,7 +818,58 @@ const fetchSmartContract = async (hash: string, smartcontractId: string) => {
         :label="updatingStatus ? 'Updating...' : 'Confirm'"
         :loading="updatingStatus"
         :disabled="updatingStatus || !checked"
-        @click="confirmStatusChange"
+        @click="confirmAcceptContract"
+      />
+    </template>
+  </Dialog>
+
+  <!-- Confirm dialog to Reject Contract -->
+  <Dialog
+    v-model:visible="cancelDialogVisible"
+    header="Confirm Acceptance of Contract"
+    modal
+    :style="{ width: '50rem' }"
+    :breakpoints="{ '1199px': '75vw', '575px': '90vw' }"
+    :closable="false"
+    :draggable="false"
+  >
+    <p class="mb-4">
+      Al proceder con el rechazo de este contrato, usted reconoce que esta acción es irreversible.
+      Una vez que el contrato sea rechazado, no podrá ser restaurado ni modificado.
+    </p>
+
+    <p class="mb-4">
+      Smart Contracts no se hace responsable de los costos ni consecuencias derivados de esta
+      decisión, incluyendo pero no limitado a tarifas de transacción, costos operativos o cualquier
+      otra implicación financiera o legal que pueda surgir como resultado del rechazo del contrato.
+    </p>
+
+    <p class="mb-4">
+      Le recomendamos que revise cuidadosamente todos los términos y condiciones del contrato antes
+      de tomar esta decisión. Si tiene alguna duda, por favor, consulte con un asesor legal o de
+      confianza antes de proceder.
+    </p>
+
+    <p class="mb-4">
+      Al continuar con el rechazo, usted acepta que Smart Contracts no asume ninguna responsabilidad
+      por cualquier daño o perjuicio que pueda resultar de esta acción.
+    </p>
+
+    <div class="flex items-center gap-2">
+      <Checkbox v-model="checked" :invalid="!checked" binary />
+      <label for="size_normal" class="size_normal"
+        >Acepto los términos y condiciones del contrato.</label
+      >
+    </div>
+
+    <template #footer>
+      <Button label="Cancel" icon="pi pi-times" @click="cancelStatusChange" />
+      <Button
+        icon="pi pi-check"
+        :label="updatingStatus ? 'Updating...' : 'Reject Contract'"
+        :loading="updatingStatus"
+        :disabled="updatingStatus || !checked"
+        @click="confirmRejectContract"
       />
     </template>
   </Dialog>

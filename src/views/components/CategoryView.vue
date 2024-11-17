@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { watch, ref, onMounted } from 'vue'
 import { storageBaseUrl } from '@/config/firebaseConfig'
 import { ServiceService } from '@/services/ServiceService'
-import type { IService } from '@/interfaces/Service'
 import { CategoryService } from '@/services/CategoryService'
+import type { IService } from '@/interfaces/Service'
 
 const services = ref<IService[]>([])
 const props = defineProps<{ categoryName: string }>()
@@ -12,32 +12,48 @@ const orderlistServices = ref<IService[]>([])
 const options = ref(['grid', 'list'])
 const layout = ref('grid')
 const categoryDisplayName = ref('')
+const loading = ref(true)
 
-onMounted(async () => {
+onMounted(() => fetchData(props.categoryName))
+
+const fetchData = async (categoryName: string) => {
+  loading.value = true
   try {
     // Buscar el nombre de la categoría en display
     categoryDisplayName.value =
-      (await CategoryService.getCategories()).find(
-        (category) => category.name === props.categoryName
-      )?.display || props.categoryName
+      (await CategoryService.getCategories()).find((category) => category.name === categoryName)
+        ?.display || categoryName
 
     // Obtener los servicios de la categoría
-    const data = await ServiceService.getServicesByCategoryName(props.categoryName)
+    const data = await ServiceService.getServicesByCategoryName(categoryName)
     services.value = data
-    console.log(props.categoryName, ': ', data)
     picklistServices.value = [data, []]
     orderlistServices.value = data
   } catch (error) {
     console.error('Error fetching services or category display name:', error)
+  } finally {
+    loading.value = false
   }
-})
+}
+
+watch(
+  () => props.categoryName,
+  (newCategory) => {
+    fetchData(newCategory)
+  }
+)
 </script>
 
 <template>
   <div class="flex flex-col">
     <div class="card">
       <div class="font-semibold text-xl">Servicios en la categoría: {{ categoryDisplayName }}</div>
-      <DataView :value="services" :layout="layout">
+
+      <div v-if="loading" class="card flex justify-center">
+        <ProgressSpinner />
+      </div>
+
+      <DataView v-else :value="services" :layout="layout">
         <template #header>
           <div class="flex justify-end">
             <SelectButton v-model="layout" :options="options" :allowEmpty="false">

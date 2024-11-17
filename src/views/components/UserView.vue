@@ -136,12 +136,15 @@ const isInfluencer = computed(() => {
     <div class="card grid grid-cols-1 md:grid-cols-2 gap-8 items-center h-full">
       <div class="flex flex-col items-center justify-center">
         <div class="font-bold text-2xl mb-4">@{{ user?.user_name }}</div>
-        <Image
-          v-if="user"
-          :src="`${storageBaseUrl}${user.photo}`"
-          :alt="user.user_name"
-          width="250"
-        />
+        <div class="flex justify-center items-center w-64 h-64 rounded-full overflow-hidden">
+          <Image
+            v-if="user"
+            :src="`${storageBaseUrl}${user.photo}`"
+            :alt="user.user_name"
+            width="250"
+            class="object-cover"
+          />
+        </div>
       </div>
 
       <div class="flex flex-col gap-4">

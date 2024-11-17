@@ -1,4 +1,3 @@
-// authService.js o authService.ts
 import { httpClient } from '@/config/httpClient'
 import type { IUser } from '@/interfaces/User'
 import { useRouter } from 'vue-router'
@@ -55,9 +54,6 @@ export const AuthService = {
       localStorage.removeItem('userId')
       localStorage.removeItem('token')
       localStorage.removeItem('typeOfUser')
-
-      // Redirigir al usuario a la página de inicio de sesión
-      router.push({ name: 'login' })
     } catch (error) {
       console.error('Error during logout:', error)
     }
