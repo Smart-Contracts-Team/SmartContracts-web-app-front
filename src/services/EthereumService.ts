@@ -15,20 +15,20 @@ export const EthereumService ={
         return ethereumBalance.data
     },
 
-    async getSmartContractData(smartcontractId: string): Promise<{ contractId: string, influencerId: string, businessId: string }> {
+    async getSmartContractData(smartcontractId: string): Promise<{ contractId: string, businessId: string, influencerId: string }> {
         try {
           const response = await httpClient.get<Array<BigInt>>(
             `${ethereumServiceName}/smartcontract/${smartcontractId}`
           );
     
           // Asume que el arreglo tiene tres elementos: contractId, influencerId, businessId
-          const [contractId, influencerId, businessId] = response.data;
+          const [contractId,businessId, influencerId] = response.data;
     
           // Retorna como objeto para mayor claridad
           return {
             contractId: contractId.toString(),
-            influencerId: influencerId.toString(),
             businessId: businessId.toString(),
+            influencerId: influencerId.toString(),
           };
         } catch (error) {
           console.error('Error fetching smart contract data', error);
