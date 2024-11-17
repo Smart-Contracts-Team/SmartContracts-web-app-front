@@ -3,9 +3,9 @@ import { useLayout } from '@/layout/composables/layout'
 import ThemeSelector from './ThemeSelector.vue'
 import { storageBaseUrl } from '@/config/firebaseConfig'
 import { ref } from 'vue'
-import type { MenuItem } from 'primevue/menuitem';
-import { AuthService } from '@/services/AuthService';
-import router from '@/router';
+import type { MenuItem } from 'primevue/menuitem'
+import { AuthService } from '@/services/AuthService'
+import router from '@/router'
 
 const { onMenuToggle, toggleDarkMode, isDarkTheme } = useLayout()
 const authService = AuthService
@@ -16,14 +16,20 @@ const overlayMenuItems = ref<MenuItem[]>([
   {
     label: 'My profile',
     icon: 'pi pi-user',
-    url: '/profile'
+    command: () => {
+      router.push('/profile')
+    }
   },
   ...(typeOfUser === 'Influencer'
-    ? [{
-        label: 'My services',
-        icon: 'pi pi-briefcase',
-        url: '/my-services'
-      }]
+    ? [
+        {
+          label: 'My services',
+          icon: 'pi pi-briefcase',
+          command: () => {
+            router.push('/my-services')
+          }
+        }
+      ]
     : []),
   {
     separator: true
@@ -32,22 +38,22 @@ const overlayMenuItems = ref<MenuItem[]>([
     label: 'Logout',
     icon: 'pi pi-power-off',
     command: () => {
-      authService.logout();
-    },
-    url: '/auth/login'
+      authService.logout()
+      router.push('/auth/login')
+    }
   }
 ])
 
 function toggleMenu(event: MouseEvent) {
   if (menu.value) {
-    (menu.value as any).toggle(event);
+    ;(menu.value as any).toggle(event)
   }
 }
 
 function goToContracts() {
   router.push({
     path: '/my-contracts'
-  });
+  })
 }
 </script>
 
@@ -59,8 +65,14 @@ function goToContracts() {
       </button>
       <div class="logo-wrapper">
         <router-link to="/home" class="layout-topbar-logo">
-          <img class="logo-image w-16 sm:w-28 md:w-36" alt="logo"
-          :src="`${storageBaseUrl}`+ 'logo%2FIsotipo%20a%20color%20-%20SMART%20CONTRACT.png?alt=media&token=5ef63848-4358-4c8f-9533-e7270d6aa205'">
+          <img
+            class="logo-image w-16 sm:w-28 md:w-36"
+            alt="logo"
+            :src="
+              `${storageBaseUrl}` +
+              'logo%2FIsotipo%20a%20color%20-%20SMART%20CONTRACT.png?alt=media&token=5ef63848-4358-4c8f-9533-e7270d6aa205'
+            "
+          />
           <span class="text-sm md:text-lg lg:text-xl whitespace-nowrap">Smart Contracts</span>
         </router-link>
       </div>
@@ -72,34 +84,46 @@ function goToContracts() {
           <i :class="['pi', { 'pi-moon': isDarkTheme, 'pi-sun': !isDarkTheme }]"></i>
         </button>
         <div class="relative">
-          <button v-styleclass="{
-            selector: '@next',
-            enterFromClass: 'hidden',
-            enterActiveClass: 'animate-scalein',
-            leaveToClass: 'hidden',
-            leaveActiveClass: 'animate-fadeout',
-            hideOnOutsideClick: true
-          }" type="button" class="layout-topbar-action layout-topbar-action-highlight">
+          <button
+            v-styleclass="{
+              selector: '@next',
+              enterFromClass: 'hidden',
+              enterActiveClass: 'animate-scalein',
+              leaveToClass: 'hidden',
+              leaveActiveClass: 'animate-fadeout',
+              hideOnOutsideClick: true
+            }"
+            type="button"
+            class="layout-topbar-action layout-topbar-action-highlight"
+          >
             <i class="pi pi-palette"></i>
           </button>
           <ThemeSelector />
         </div>
       </div>
 
-      <button class="layout-topbar-menu-button layout-topbar-action" v-styleclass="{
-        selector: '@next',
-        enterFromClass: 'hidden',
-        enterActiveClass: 'animate-scalein',
-        leaveToClass: 'hidden',
-        leaveActiveClass: 'animate-fadeout',
-        hideOnOutsideClick: true
-      }">
+      <button
+        class="layout-topbar-menu-button layout-topbar-action"
+        v-styleclass="{
+          selector: '@next',
+          enterFromClass: 'hidden',
+          enterActiveClass: 'animate-scalein',
+          leaveToClass: 'hidden',
+          leaveActiveClass: 'animate-fadeout',
+          hideOnOutsideClick: true
+        }"
+      >
         <i class="pi pi-ellipsis-v"></i>
       </button>
 
       <div class="layout-topbar-menu hidden lg:block">
         <div class="layout-topbar-menu-content">
-          <button v-tooltip.bottom="'Ver contratos'" type="button" class="layout-topbar-action" @click="goToContracts()">
+          <button
+            v-tooltip.bottom="'Ver contratos'"
+            type="button"
+            class="layout-topbar-action"
+            @click="goToContracts()"
+          >
             <i class="pi pi-inbox"></i>
             <span>Contracts</span>
           </button>
@@ -124,7 +148,7 @@ function goToContracts() {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100%; 
+  height: 100%;
   width: 100%;
 }
 

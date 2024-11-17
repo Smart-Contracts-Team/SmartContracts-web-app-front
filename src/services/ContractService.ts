@@ -20,8 +20,8 @@ export const ContractService = {
     return response.data
   },
 
-  async createContract(contract: IRegisterContractRequestDto): Promise<IApiResponse> {
-    const response = await httpClient.post<IApiResponse>(`${serviceName}`, contract)
+  async createContract(contract: IRegisterContractRequestDto): Promise<IContract> {
+    const response = await httpClient.post<IContract>(`${serviceName}`, contract)
     return response.data
   },
 
