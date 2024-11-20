@@ -6,6 +6,7 @@ import { UserService } from '@/services/UserService'
 import type { IService } from '@/interfaces/Service'
 import { TaskService } from '@/services/TaskService'
 import type { ITask } from '@/interfaces/Task'
+import type { IUser } from '@/interfaces/User'
 
 const tasks = ref<ITask[]>([])
 const service = ref<IService | null>(null)
@@ -92,14 +93,14 @@ const getSeverity = (status: string) => {
               :image="`${storageBaseUrl}` + user?.photo"
               shape="circle"
               class="cursor-pointer"
-              @click="$router.push(`/user-information/` + service.userId)"
+              @click="$router.push(`/user-information/` + service?.userId)"
             />
             <span
               v-if="user"
               id="influencer"
               class="cursor-pointer"
               type="text"
-              @click="$router.push(`/user-information/` + service.userId)"
+              @click="$router.push(`/user-information/` + service?.userId)"
               >{{ user.firstName }} {{ user.lastName }}</span
             >
           </div>

@@ -97,7 +97,7 @@ const expandedSmartContract = ref<{
   hash: string
 } | null>(null)
 const showContractDialog = ref(false)
-watch(expandedSmartContract, (newContract) => {
+watch(expandedSmartContract, () => {
   fetchContractDetails()
 })
 
@@ -231,7 +231,6 @@ async function saveContract() {
   contractDto.value.businessId = newContract.value.businessId
   contractDto.value.influencerId = newContract.value.influencerId
 
-  console.log('datos pa guardar: ', newContract.value)
   try {
     registeringContract.value = true
 

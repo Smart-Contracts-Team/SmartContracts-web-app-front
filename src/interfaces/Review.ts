@@ -1,3 +1,5 @@
+import type { IService } from './Service'
+
 export interface IReview {
   id: number
   title: string
@@ -27,4 +29,5 @@ export interface IRegisterReviewRequestDto {
   authorId: number
   influencerId: number
   serviceId: number
+  aux?: IService
 }
