@@ -7,7 +7,7 @@ import { UserService } from '@/services/UserService'
 import { PhotoService } from '@/services/PhotoService'
 import type { IUser } from '@/interfaces/User'
 
-const user = ref<IUser>()
+const user = ref<IUser>({} as IUser)
 const selectedFile = ref<File | null>(null)
 const pageReady = ref(false)
 const loading = ref(false)
@@ -52,14 +52,6 @@ const saveData = async () => {
         })
         return
       }
-    } else {
-      toast.add({
-        severity: 'warn',
-        summary: 'Warning',
-        detail: 'User data or selected file is missing.',
-        life: 3000
-      })
-      return
     }
 
     // Si el usuario tiene datos, los actualizamos
@@ -269,14 +261,15 @@ function onFileSelect(event: any) {
           </div>
 
           <div class="flex flex-col md:flex-row gap-4">
-            <div class="flex flex-wrap gap-2 w-full">
+            <div class="flex flex-col gap-2 w-full">
               <label for="birthdate">Birthdate</label>
-              <InputText
-                v-if="user"
+              <DatePicker
                 id="birthdate"
-                type="text"
-                :disabled="!isEditing"
                 v-model="user.birthDate"
+                :disabled="!isEditing"
+                showIcon
+                fluid
+                iconDisplay="input"
               />
             </div>
             <div class="flex flex-wrap gap-2 w-full">
