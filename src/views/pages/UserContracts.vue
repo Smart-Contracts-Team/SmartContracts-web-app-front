@@ -10,6 +10,8 @@ import { CategoryService } from '@/services/CategoryService'
 import { ServiceService } from '@/services/ServiceService'
 import { EthereumService } from '@/services/EthereumService'
 
+const activeStep = ref(1)
+
 const filters = ref({
   global: { value: null, matchMode: FilterMatchMode.CONTAINS }
 })
@@ -154,9 +156,8 @@ function validateField(
   }
 }
 
-async function saveContract() {
+function validationFields() {
   submitted.value = true
-
   // Llama a todas las funciones de validación
   validateField(
     newContract.value.title,
@@ -192,7 +193,20 @@ async function saveContract() {
     console.log(errorValidation)
     return
   }
+}
 
+function goToStep(step: number) {
+  if (activeStep.value === 1 && step === 2) {
+    // Realizar validación antes de pasar al paso 2
+    validationFields()
+    if (Object.values(errorValidation).some((ref) => ref.value)) {
+      return // Detener la navegación si hay errores
+    }
+  }
+  activeStep.value = step
+}
+
+async function saveContract() {
   // Agregando datos
   newContract.value.influencerId = influencerId.value || 0
   newContract.value.businessId = userId
@@ -522,7 +536,7 @@ const fetchSmartContract = async (hash: string, smartcontractId: string) => {
       ></Column>
       <Column v-if="userType == 'Influencer'" header="Actions">
         <template #body="{ data }">
-          <div class="flex space-x-2">            
+          <div class="flex space-x-2">
             <Button
               icon="pi pi-file"
               severity="info"
@@ -585,7 +599,7 @@ const fetchSmartContract = async (hash: string, smartcontractId: string) => {
   <Dialog
     v-model:visible="showContractDialog"
     :style="{ width: '500px' }"
-    header="📄 Contract Details"
+    header="Contract Details"
     modal
     :draggable="false"
     class="p-fluid"
@@ -620,128 +634,245 @@ const fetchSmartContract = async (hash: string, smartcontractId: string) => {
   <!-- Diálogo para crear/editar contrato -->
   <Dialog
     v-model:visible="registerDialogVisible"
-    :style="{ width: '450px' }"
-    header="Contract Details"
+    :style="{ width: '50rem' }"
+    header="Contract Information"
     modal
     :draggable="false"
   >
-    <div class="flex flex-col gap-6">
-      <div>
-        <label for="title" class="block font-bold mb-3">Title</label>
-        <InputText
-          id="title"
-          v-model.trim="newContract.title"
-          required="true"
-          autofocus
-          :invalid="submitted && !newContract.title"
-          fluid
-        />
-        <small v-if="submitted && !newContract.title" class="text-red-500"
-          >Title is required.</small
-        >
-      </div>
+    <div class="card flex justify-center">
+      <Stepper v-model:value="activeStep" class="basis-[40rem]">
+        <StepList>
+          <Step v-slot="{ activateCallback, value, a11yAttrs }" asChild :value="1">
+            <div class="flex flex-row flex-auto gap-2" v-bind="a11yAttrs.root">
+              <button
+                class="bg-transparent border-0 inline-flex flex-col gap-2"
+                @click="activateCallback"
+                v-bind="a11yAttrs.header"
+              >
+                <span
+                  :class="[
+                    'rounded-full border-2 w-12 h-12 inline-flex items-center justify-center',
+                    {
+                      'bg-primary text-primary-contrast border-primary':
+                        Number(value) <= activeStep,
+                      'border-surface-200 dark:border-surface-700': Number(value) > activeStep
+                    }
+                  ]"
+                >
+                  <i class="pi pi-user" />
+                </span>
+              </button>
+              <Divider />
+            </div>
+          </Step>
+          <Step v-slot="{ activateCallback, value, a11yAttrs }" asChild :value="2">
+            <div class="flex flex-row pl-2" v-bind="a11yAttrs.root">
+              <button
+                class="bg-transparent border-0 inline-flex flex-col gap-2"
+                @click="activateCallback"
+                v-bind="a11yAttrs.header"
+              >
+                <span
+                  :class="[
+                    'rounded-full border-2 w-12 h-12 inline-flex items-center justify-center',
+                    {
+                      'bg-primary text-primary-contrast border-primary':
+                        Number(value) <= activeStep,
+                      'border-surface-200 dark:border-surface-700': Number(value) > activeStep
+                    }
+                  ]"
+                >
+                  <i class="pi pi-id-card" />
+                </span>
+              </button>
+            </div>
+          </Step>
+        </StepList>
+        <StepPanels>
+          <StepPanel :value="1">
+            <div class="flex flex-col gap-2 mx-auto" style="min-height: 16rem; max-width: 20rem">
+              <div class="text-center mt-4 mb-4 text-xl font-semibold">
+                Complete the following information
+              </div>
+              <div class="field">
+                <div class="flex flex-col gap-6">
+                  <div>
+                    <label for="title" class="block font-bold mb-3">Title</label>
+                    <InputText
+                      id="title"
+                      v-model.trim="newContract.title"
+                      required="true"
+                      autofocus
+                      :invalid="submitted && !newContract.title"
+                      fluid
+                    />
+                    <small v-if="submitted && !newContract.title" class="text-red-500"
+                      >Title is required.</small
+                    >
+                  </div>
 
-      <div>
-        <label for="description" class="block font-bold mb-3">Description</label>
-        <InputText
-          id="description"
-          v-model.trim="newContract.description"
-          required="true"
-          :invalid="submitted && !newContract.description"
-          fluid
-        />
-        <small v-if="submitted && !newContract.description" class="text-red-500"
-          >Description is required.</small
-        >
-      </div>
+                  <div>
+                    <label for="description" class="block font-bold mb-3">Description</label>
+                    <InputText
+                      id="description"
+                      v-model.trim="newContract.description"
+                      required="true"
+                      :invalid="submitted && !newContract.description"
+                      fluid
+                    />
+                    <small v-if="submitted && !newContract.description" class="text-red-500"
+                      >Description is required.</small
+                    >
+                  </div>
 
-      <div>
-        <label for="type" class="block font-bold mb-3">Type</label>
-        <Select
-          v-model.trim="selectedType"
-          :options="typeOpts"
-          optionLabel="display"
-          placeholder="Select a Type"
-          checkmark
-          :highlightOnSelect="false"
-          class="w-full"
-        />
-        <small v-if="submitted && !newContract.type" class="text-red-500">Type is required.</small>
-      </div>
+                  <div>
+                    <label for="type" class="block font-bold mb-3">Type</label>
+                    <Select
+                      v-model.trim="selectedType"
+                      :options="typeOpts"
+                      optionLabel="display"
+                      placeholder="Select a Type"
+                      checkmark
+                      :highlightOnSelect="false"
+                      class="w-full"
+                    />
+                    <small v-if="submitted && !newContract.type" class="text-red-500"
+                      >Type is required.</small
+                    >
+                  </div>
 
-      <div>
-        <label for="influencerId" class="block font-bold mb-3">Influencer</label>
-        <Dropdown
-          v-model="selectedInfluencer"
-          :options="influencersList"
-          filter
-          optionLabel="display"
-          placeholder="Select an Influencer"
-          class="w-full"
-        />
-        <small v-if="submitted && !newContract.influencerId" class="text-red-500">
-          Influencer is required.
-        </small>
-      </div>
+                  <div>
+                    <label for="influencerId" class="block font-bold mb-3">Influencer</label>
+                    <Dropdown
+                      v-model="selectedInfluencer"
+                      :options="influencersList"
+                      filter
+                      optionLabel="display"
+                      placeholder="Select an Influencer"
+                      class="w-full"
+                    />
+                    <small v-if="submitted && !newContract.influencerId" class="text-red-500">
+                      Influencer is required.
+                    </small>
+                  </div>
 
-      <div>
-        <label for="services" class="block font-bold mb-3">Service</label>
-        <Dropdown
-          v-model="selectedServices"
-          :options="servicesList"
-          filter
-          optionLabel="name"
-          placeholder="Select an Service"
-          class="w-full"
-        />
-        <small v-if="submitted && !newContract.services" class="text-red-500">
-          Service is required.
-        </small>
-      </div>
+                  <div>
+                    <label for="services" class="block font-bold mb-3">Service</label>
+                    <Dropdown
+                      v-model="selectedServices"
+                      :options="servicesList"
+                      filter
+                      optionLabel="name"
+                      placeholder="Select an Service"
+                      class="w-full"
+                    />
+                    <small v-if="submitted && !newContract.services" class="text-red-500">
+                      Service is required.
+                    </small>
+                  </div>
 
-      <div>
-        <label for="startDate" class="block font-bold mb-3">Start Date</label>
-        <DatePicker
-          id="startDate"
-          v-model="newContract.startDate"
-          required="true"
-          :invalid="submitted && !newContract.startDate"
-          showIcon
-          fluid
-          iconDisplay="input"
-        />
-        <small v-if="submitted && !newContract.startDate" class="text-red-500"
-          >Start Date is required.</small
-        >
-      </div>
+                  <div>
+                    <label for="startDate" class="block font-bold mb-3">Start Date</label>
+                    <DatePicker
+                      id="startDate"
+                      v-model="newContract.startDate"
+                      required="true"
+                      :invalid="submitted && !newContract.startDate"
+                      showIcon
+                      fluid
+                      iconDisplay="input"
+                    />
+                    <small v-if="submitted && !newContract.startDate" class="text-red-500"
+                      >Start Date is required.</small
+                    >
+                  </div>
 
-      <div>
-        <label for="finalDate" class="block font-bold mb-3">Final Date</label>
-        <DatePicker
-          id="finalDate"
-          v-model="newContract.finalDate"
-          required="true"
-          :invalid="submitted && !newContract.finalDate"
-          showIcon
-          fluid
-          iconDisplay="input"
-        />
-        <small v-if="submitted && !newContract.finalDate" class="text-red-500"
-          >Final Date is required.</small
-        >
-      </div>
+                  <div>
+                    <label for="finalDate" class="block font-bold mb-3">Final Date</label>
+                    <DatePicker
+                      id="finalDate"
+                      v-model="newContract.finalDate"
+                      required="true"
+                      :invalid="submitted && !newContract.finalDate"
+                      showIcon
+                      fluid
+                      iconDisplay="input"
+                    />
+                    <small v-if="submitted && !newContract.finalDate" class="text-red-500"
+                      >Final Date is required.</small
+                    >
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="flex pt-6 justify-end">
+              <Button label="Next" icon="pi pi-arrow-right" iconPos="right" @click="goToStep(2)" />
+            </div>
+          </StepPanel>
+          <StepPanel v-slot="{ activateCallback }" :value="2">
+            <div class="flex flex-col gap-2 mx-auto" style="min-height: 16rem; max-width: 24rem">
+              <div class="text-center mt-4 mb-4 text-xl font-semibold">
+                Aviso Importante sobre la Creación de Contratos
+              </div>
+              <p class="mb-4">
+                Al proceder con la creación del contrato a través de nuestra plataforma, usted, como
+                representante de su empresa, acepta y se compromete a asumir la totalidad de los
+                costos asociados con el mismo. Es importante destacar que Smart Contracts actúa
+                únicamente como intermediario tecnológico para la generación y gestión de contratos
+                digitales.
+              </p>
+              <p class="mb-2 font-bold text-xl">Limitación de Responsabilidad</p>
+              <p class="mb-4">
+                Smart Contracts no se hace responsable en caso de que el influencer decida no
+                aceptar el contrato emitido. Para evitar posibles inconvenientes, recomendamos
+                encarecidamente que su empresa mantenga conversaciones previas con el influencer.
+                Estas conversaciones deben servir para acordar claramente los términos del servicio,
+                incluyendo detalles como:
+              </p>
+              <ul>
+                <li>La naturaleza y alcance del servicio solicitado.</li>
+                <li>Las fechas de inicio y finalización del contrato.</li>
+                <li>Los entregables esperados.</li>
+                <li>Las condiciones de pago y cualquier otra cláusula relevante.</li>
+              </ul>
+              <p class="mb-2 font-bold text-xl">Recomendación</p>
+              <p class="mb-4">
+                Un acuerdo verbal o por escrito previo entre su empresa y el influencer puede evitar
+                malentendidos y asegurar una mayor probabilidad de aceptación del contrato. Una vez
+                emitido, el contrato se considera vinculante según los términos establecidos en la
+                plataforma, siempre que ambas partes lo acepten.
+              </p>
+              <p class="mb-4">
+                Al continuar con la creación del contrato, confirma que ha leído y comprendido este
+                aviso, y acepta proceder bajo las condiciones aquí descritas. Para cualquier duda o
+                consulta adicional, no dude en comunicarse con nuestro equipo de soporte.
+              </p>
+              <div class="flex items-center gap-2">
+                <Checkbox v-model="checked" :invalid="!checked" binary />
+                <label for="size_normal" class="size_normal"
+                  >Acepto los términos y condiciones del contrato.</label
+                >
+              </div>
+            </div>
+            <div class="flex pt-6 justify-between">
+              <Button
+                label="Back"
+                severity="secondary"
+                icon="pi pi-arrow-left"
+                @click="activateCallback(1)"
+              />
+              <Button
+                :label="registeringContract ? 'Registering...' : 'Register'"
+                icon="pi pi-check"
+                :loading="registeringContract"
+                :disabled="registeringContract || !checked"
+                @click="saveContract"
+              />
+            </div>
+          </StepPanel>
+        </StepPanels>
+      </Stepper>
     </div>
-
-    <template #footer>
-      <Button label="Cancel" icon="pi pi-times" text @click="hideDialog" />
-      <Button
-        icon="pi pi-check"
-        :label="registeringContract ? 'Registering...' : 'Register'"
-        :loading="registeringContract"
-        :disabled="registeringContract"
-        @click="saveContract"
-      />
-    </template>
   </Dialog>
 
   <!-- Confirm dialog to Accept Contract -->
