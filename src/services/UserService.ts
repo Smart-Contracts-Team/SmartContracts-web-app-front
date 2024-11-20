@@ -9,7 +9,7 @@ export const UserService = {
     return response.data
   },
 
-  async getUserById(userId: number): Promise<IUser> {
+  async getUserById(userId: any): Promise<IUser> {
     const response = await httpClient.get<IUser>(`${serviceName}/${userId}`)
     return response.data
   },

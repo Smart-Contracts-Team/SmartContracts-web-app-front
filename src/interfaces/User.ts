@@ -8,7 +8,7 @@ export interface IUser {
   email: string
   password: string
   phone: string
-  birthDate: string
+  birthDate: Date
   photo: string
   location: string
   role: string

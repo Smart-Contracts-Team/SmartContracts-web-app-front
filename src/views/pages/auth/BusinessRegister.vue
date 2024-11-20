@@ -14,7 +14,7 @@ const userData = ref<IUser>({
   email: '',
   password: '',
   phone: '',
-  birthDate: '',
+  birthDate: new Date(),
   photo: '',
   location: '',
   role: ''

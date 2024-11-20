@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref, watch, computed } from 'vue'
+import { useToast } from 'primevue/usetoast'
 import { storageBaseUrl } from '@/config/firebaseConfig'
 import { UserService } from '@/services/UserService'
 import { ServiceService } from '@/services/ServiceService'
@@ -7,7 +8,9 @@ import { CategoryService } from '@/services/CategoryService'
 import { ReviewService } from '@/services/ReviewService'
 import type { IUser } from '@/interfaces/User'
 import type { IService } from '@/interfaces/Service'
-import type { IReview } from '@/interfaces/Review'
+import type { IRegisterReviewRequestDto, IReview } from '@/interfaces/Review'
+
+const toast = useToast()
 
 const user = ref<IUser | null>(null)
 const services = ref<IService[]>([])
@@ -16,7 +19,21 @@ const pageReady = ref(false)
 const userLoading = ref(true)
 const servicesLoading = ref(true)
 const reviewsLoading = ref(true)
-const props = defineProps<{ userId: number }>()
+const props = defineProps<{ userId: any }>()
+
+const newReview = ref<IRegisterReviewRequestDto>({} as IRegisterReviewRequestDto)
+const registeringReview = ref(false)
+const submitted = ref(false)
+const authorId = Number(localStorage.getItem('userId') ?? 0)
+const userType = String(localStorage.getItem('typeOfUser') ?? '')
+const canReview = ref(false)
+
+const errorValidation = {
+  titleError: ref(''),
+  descriptionError: ref(''),
+  serviceNameError: ref(''),
+  starsError: ref(0)
+}
 
 const carouselResponsiveOptions = ref([
   {
@@ -60,6 +77,8 @@ onMounted(async () => {
   await getUser(props.userId)
   await loadServices(props.userId)
   await loadReviews(props.userId)
+
+  userCanReview()
 })
 
 async function getUser(userId: number) {
@@ -74,6 +93,82 @@ async function getUser(userId: number) {
     )
   } finally {
     userLoading.value = false
+  }
+}
+
+function userCanReview() {
+  if (isInfluencer.value && userType === 'Business') return (canReview.value = true)
+  else if (!isInfluencer.value && userType === 'Influencer') return (canReview.value = true)
+  else return (canReview.value = false)
+}
+
+// Funciónes de validación
+function validateField(value: string | number | Date, errorMsg: string, errorRef: Ref<string>) {
+  if (
+    value === null ||
+    value === undefined ||
+    (typeof value === 'string' && value.trim() === '') ||
+    (typeof value === 'number' && isNaN(value)) ||
+    (value instanceof Date && isNaN(value.getTime()))
+  ) {
+    errorRef.value = errorMsg
+  } else {
+    errorRef.value = ''
+  }
+}
+
+async function saveReview() {
+  submitted.value = true
+
+  // Llama a todas las funciones de validación
+  validateField(newReview.value.title, 'El título es obligatorio', errorValidation.titleError)
+  validateField(
+    newReview.value.description,
+    'La descripción es obligatoria',
+    errorValidation.descriptionError
+  )
+  // validateField(
+  //   newReview.value.serviceName,
+  //   'El nombre del servicio es obligatorio',
+  //   errorValidation.serviceNameError
+  // )
+  validateField(newReview.value.stars, 'Las estrellas son obligatorias', errorValidation.starsError)
+
+  // Verifica si hay errores en los campos
+  if (Object.values(errorValidation).some((ref) => ref.value)) {
+    console.log(errorValidation)
+    return
+  }
+
+  // Agregando datos
+  newReview.value.dateCreated = new Date()
+  newReview.value.influencerId = Number(user.value?.id)
+  newReview.value.authorId = authorId
+  newReview.value.serviceId = Number(newReview.value.aux?.id)
+  newReview.value.serviceName = String(newReview.value.aux?.name)
+
+  // MALA PRÁCTICA, PERO NECESARIA
+  delete newReview.value.aux
+  try {
+    registeringReview.value = true
+
+    await ReviewService.createReview(newReview.value)
+    toast.add({
+      severity: 'success',
+      summary: 'Success',
+      detail: 'Review Created',
+      life: 3000
+    })
+    await loadReviews(Number(user.value?.id))
+  } catch (error) {
+    toast.add({
+      severity: 'error',
+      summary: 'Error',
+      detail: (error as Error).message,
+      life: 3000
+    })
+  } finally {
+    registeringReview.value = false
   }
 }
 
@@ -104,17 +199,30 @@ async function loadServices(userId: number) {
 async function loadReviews(userId: number) {
   try {
     const reviewsResponse = await ReviewService.getReviewsByUserId(userId)
-    const reviewsWithAuthorInfo = await Promise.all(
+    const reviewsWithAuthorAndServiceInfo = await Promise.all(
       reviewsResponse.map(async (review) => {
+        // Obtener el autor de la reseña
         const author = await UserService.getUserById(review.authorId)
+        // Obtener el servicio asociado con la reseña
+        const service = await ServiceService.getServiceById(review.serviceId)
+
         return {
           ...review,
           authorPhoto: author ? author.photo : '',
-          authorName: author ? author.user_name : ''
+          authorName: author ? author.user_name : '',
+          serviceName: service ? service.name : ''
         }
       })
     )
-    reviews.value = reviewsWithAuthorInfo
+
+    // Ordenar las reseñas por la fecha de creación (de más reciente a más antiguo)
+    reviewsWithAuthorAndServiceInfo.sort((a, b) => {
+      const dateA = new Date(a.dateCreated)
+      const dateB = new Date(b.dateCreated)
+      return dateB.getTime() - dateA.getTime() // Para ordenar de más reciente a más antiguo
+    })
+
+    reviews.value = reviewsWithAuthorAndServiceInfo
   } catch (error: any) {
     console.error(
       error.response ? 'Error al obtener las reseñas:' : 'Token no encontrado en localStorage',
@@ -221,6 +329,7 @@ const isInfluencer = computed(() => {
                   />
                 </div>
               </div>
+              <div class="mb-4 font-bold text-xl">{{ slotProps.data.name }}</div>
               <div class="mb-4 font-medium flex-grow">{{ slotProps.data.description }}</div>
               <div class="flex justify-between items-center mt-auto">
                 <div class="mt-0 font-semibold text-xl">${{ slotProps.data.price }}</div>
@@ -243,6 +352,72 @@ const isInfluencer = computed(() => {
     <div class="flex flex-col gap-8 w-full mt-8">
       <div class="card w-full">
         <div class="font-bold text-2xl mb-4">Reviews</div>
+        <!-- Add review -->
+        <div v-if="canReview" class="flex mt-8">
+          <div class="card flex flex-col gap-4 w-full">
+            <div class="font-semibold text-xl">Add Review</div>
+
+            <div class="flex flex-wrap gap-4 items-center justify-between">
+              <div class="flex items-center gap-2 w-auto">
+                <label for="rating">Stars: </label>
+                <Rating
+                  name="rating"
+                  v-model.trim="newReview.stars"
+                  required="true"
+                  :invalid="submitted && !newReview.stars"
+                />
+              </div>
+              <div class="flex items-center gap-2 justify-end w-auto">
+                <Button
+                  icon="pi pi-check"
+                  :label="registeringReview ? 'Sending...' : 'Send'"
+                  :loading="registeringReview"
+                  :disabled="registeringReview"
+                  @click="saveReview"
+                />
+              </div>
+            </div>
+
+            <div class="flex flex-col md:flex-row gap-4">
+              <div class="flex flex-wrap gap-2 w-full">
+                <label for="title">Title</label>
+                <InputText
+                  id="title"
+                  type="text"
+                  v-model.trim="newReview.title"
+                  required="true"
+                  autofocus
+                  :invalid="submitted && !newReview.title"
+                />
+              </div>
+              <div class="flex flex-wrap gap-2 w-full">
+                <label for="service">Service</label>
+                <Select
+                  v-model.trim="newReview.aux"
+                  :options="services"
+                  optionLabel="name"
+                  placeholder="Select a Service"
+                  checkmark
+                  :highlightOnSelect="false"
+                  class="w-full"
+                ></Select>
+              </div>
+            </div>
+
+            <div class="flex flex-wrap">
+              <label for="description">Description</label>
+              <Textarea
+                id="description"
+                rows="4"
+                v-model.trim="newReview.description"
+                required="true"
+                autofocus
+                :invalid="submitted && !newReview.description"
+              />
+            </div>
+          </div>
+        </div>
+        <!-- Existing reviews -->
         <div v-if="reviews.length > 0 && !reviewsLoading">
           <Panel v-for="reviews in reviews" :key="reviews.id" class="mb-4">
             <template #header>
