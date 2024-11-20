@@ -12,6 +12,9 @@ import { EthereumService } from '@/services/EthereumService'
 
 const activeStep = ref(1)
 
+const influencerName = ref('')
+const businessName = ref('')
+
 const filters = ref({
   global: { value: null, matchMode: FilterMatchMode.CONTAINS }
 })
@@ -85,6 +88,17 @@ watch(selectedInfluencer, async (newVal: any) => {
     // Si no hay influencer seleccionado, limpiar la lista de servicios
     servicesList.value = []
   }
+})
+
+const expandedSmartContract = ref<{
+  contractId: string
+  influencerId: string
+  businessId: string
+  hash: string
+} | null>(null)
+const showContractDialog = ref(false)
+watch(expandedSmartContract, (newContract) => {
+  fetchContractDetails()
 })
 
 onMounted(async () => {
@@ -307,6 +321,22 @@ async function loadContracts() {
   }
 }
 
+async function fetchContractDetails() {
+  if (expandedSmartContract.value) {
+    try {
+      // Obtén los datos del influencer y del negocio usando el id
+      const influencer = await UserService.getUserById(expandedSmartContract.value.influencerId)
+      const business = await UserService.getUserById(expandedSmartContract.value.businessId)
+
+      // Asignar los nombres de los usuarios
+      influencerName.value = influencer.firstName + influencer.lastName
+      businessName.value = business.user_name
+    } catch (error) {
+      console.error('Error fetching user details', error)
+    }
+  }
+}
+
 // Define la función para calcular el precio total de los servicios seleccionados
 function calculateTotalPrice() {
   // Asegúrate de que se estén utilizando los valores correctos para el cálculo
@@ -425,14 +455,6 @@ const getStatusLabel = (status: string) => {
   }
 }
 
-const expandedSmartContract = ref<{
-  contractId: string
-  influencerId: string
-  businessId: string
-  hash: string
-} | null>(null)
-const showContractDialog = ref(false)
-
 // Función para abrir el modal después de obtener los datos
 const fetchSmartContract = async (hash: string, smartcontractId: string) => {
   try {
@@ -534,7 +556,7 @@ const fetchSmartContract = async (hash: string, smartcontractId: string) => {
             :severity="getStatusLabel(slotProps.data.status).severity"
           /> </template
       ></Column>
-      <Column v-if="userType == 'Influencer'" header="Actions">
+      <Column header="Actions">
         <template #body="{ data }">
           <div class="flex space-x-2">
             <Button
@@ -547,7 +569,7 @@ const fetchSmartContract = async (hash: string, smartcontractId: string) => {
               @click="fetchSmartContract(data.hash, data.id)"
             />
             <Button
-              v-if="data.status == 'pending'"
+              v-if="userType == 'Influencer' && data.status == 'pending'"
               icon="pi pi-check"
               rounded
               variant="outlined"
@@ -557,7 +579,7 @@ const fetchSmartContract = async (hash: string, smartcontractId: string) => {
               @click="openAcceptDialog(data)"
             />
             <Button
-              v-if="data.status == 'pending'"
+              v-if="userType == 'Influencer' && data.status == 'pending'"
               icon="pi pi-times"
               rounded
               variant="outlined"
@@ -595,7 +617,6 @@ const fetchSmartContract = async (hash: string, smartcontractId: string) => {
   </div>
 
   <!-- Dialogo para abrir contractos-->
-
   <Dialog
     v-model:visible="showContractDialog"
     :style="{ width: '500px' }"
@@ -610,12 +631,12 @@ const fetchSmartContract = async (hash: string, smartcontractId: string) => {
         <span class="text-gray-700">{{ expandedSmartContract.contractId }}</span>
       </div>
       <div>
-        <label class="block font-bold mb-2">Influencer ID:</label>
-        <span class="text-gray-700">{{ expandedSmartContract.influencerId }}</span>
+        <label class="block font-bold mb-2">Influencer Name:</label>
+        <span class="text-gray-700">{{ influencerName }}</span>
       </div>
       <div>
-        <label class="block font-bold mb-2">Business ID:</label>
-        <span class="text-gray-700">{{ expandedSmartContract.businessId }}</span>
+        <label class="block font-bold mb-2">Business Name:</label>
+        <span class="text-gray-700">{{ businessName }}</span>
       </div>
       <div>
         <label class="block font-bold mb-2">Hash Contract:</label>
